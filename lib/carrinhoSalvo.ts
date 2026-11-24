@@ -60,3 +60,12 @@ export function salvarCarrinho(c: CarrinhoSalvo): void {
     /* sem armazenamento disponível: o carrinho só vive na sessão */
   }
 }
+
+/** Apaga o carrinho salvo (compra concluída). */
+export function apagarCarrinho(): void {
+  try {
+    window.localStorage.removeItem(CHAVE_CARRINHO);
+  } catch {
+    /* sem armazenamento disponível */
+  }
+}

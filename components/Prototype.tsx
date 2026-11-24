@@ -9,19 +9,21 @@ import NewCardSheet from "@/components/NewCardSheet";
 import PackageSheet from "@/components/PackageSheet";
 import PersonSheet from "@/components/PersonSheet";
 import PixScreen from "@/components/PixScreen";
+import ProcessingScreen from "@/components/ProcessingScreen";
 import Skeleton from "@/components/Skeletons";
+import SuccessScreen, { type Pedido } from "@/components/SuccessScreen";
 import { PESSOAS, adicionar, diminuir, pacotePorId, remover, resumo, type Filtro, type Itens } from "@/lib/catalogo";
-import { lerCarrinho, salvarCarrinho } from "@/lib/carrinhoSalvo";
-import { PIX_FICTICIO, prepararTeclado, type MetodoId } from "@/lib/pagamento";
+import { apagarCarrinho, lerCarrinho, salvarCarrinho } from "@/lib/carrinhoSalvo";
+import { PIX_FICTICIO, PROCESSANDO_MS, prepararTeclado, type MetodoId } from "@/lib/pagamento";
 
-type Tela = "home" | "catalogo" | "carrinho" | "pix";
+type Tela = "home" | "catalogo" | "carrinho" | "processando" | "pix" | "concluido";
 
 const CARREGAMENTO_MS = 700;
 const PIX_VALIDADE_MS = 30 * 60 * 1000;
 
 /**
  * Fluxo: Home → Comprar → "Pra quem deseja comprar?" → Comprar consulta (+ detalhe do pacote)
- * → Revisar carrinho (método, resumo, Compre também) → Pix.
+ * → Revisar carrinho (método, resumo, Compre também) → Processando → Pix (QR) ou direto → Pagamento concluído.
  * Cada avanço mostra um skeleton por ~700 ms (simula a busca de dados). O voltar do celular volta uma tela.
  */
 export default function Prototype() {
@@ -34,12 +36,15 @@ export default function Prototype() {
   const [detalhe, setDetalhe] = useState<string | null>(null);
   const [metodo, setMetodo] = useState<MetodoId | null>(null);
   const [cartaoFinal, setCartaoFinal] = useState<string | null>(null);
+  const [parcelas, setParcelas] = useState(1);
+  const [pedido, setPedido] = useState<Pedido | null>(null);
   const [sheetCartao, setSheetCartao] = useState(false);
   const [alertaN, setAlertaN] = useState(0);
   const [pixExpira, setPixExpira] = useState(0);
   const [aviso, setAviso] = useState<string | null>(null);
   const timerAviso = useRef<ReturnType<typeof setTimeout>>(undefined);
   const timerCarga = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const timerProcessa = useRef<ReturnType<typeof setTimeout>>(undefined);
   /** Pilha própria de telas: o roteador do Next reescreve history.state, então não dá para depender dele. */
   const pilha = useRef<Tela[]>(["home"]);
   /** Só grava depois de ler o carrinho salvo, para não sobrescrevê-lo com o estado inicial vazio. */
@@ -67,6 +72,7 @@ export default function Prototype() {
   useEffect(() => {
     carregar();
     const onPop = () => {
+      clearTimeout(timerProcessa.current);
       if (pilha.current.length > 1) pilha.current.pop();
       setTela(pilha.current[pilha.current.length - 1]);
       setDetalhe(null);
@@ -78,16 +84,19 @@ export default function Prototype() {
       window.removeEventListener("popstate", onPop);
       clearTimeout(timerAviso.current);
       clearTimeout(timerCarga.current);
+      clearTimeout(timerProcessa.current);
     };
   }, [carregar]);
 
-  const navegar = (t: Tela) => {
+  /** comSkeleton=false: telas que não buscam dados (Pix já vem do loading de processamento, Pagamento concluído). */
+  const navegar = (t: Tela, comSkeleton = true) => {
     setTela(t);
     setDetalhe(null);
     pilha.current.push(t);
     window.history.pushState(null, "");
     window.scrollTo(0, 0);
-    carregar();
+    if (comSkeleton) carregar();
+    else setCarregando(false);
   };
   const voltar = () => (pilha.current.length > 1 ? window.history.back() : setTela("home"));
 
@@ -123,24 +132,56 @@ export default function Prototype() {
     setAlertaN(0);
   };
 
+  /** Mostra "Processando dados de pagamentos" (fora da pilha do voltar) e depois segue. */
+  const processar = (depois: () => void) => {
+    setTela("processando");
+    setDetalhe(null);
+    window.scrollTo(0, 0);
+    clearTimeout(timerProcessa.current);
+    timerProcessa.current = setTimeout(depois, PROCESSANDO_MS);
+  };
+
+  /** Conclui a compra: guarda o pedido para a tela de sucesso e esvazia o carrinho (inclusive o salvo). */
+  const concluir = (m: MetodoId) => {
+    setPedido({ itens, metodo: m, cartaoFinal, parcelas });
+    setItens({});
+    apagarCarrinho();
+    setMetodo(null);
+    pilha.current = ["home"]; /* o voltar a partir daqui leva para a Home, não de volta ao pagamento */
+    navegar("concluido", false);
+  };
+
   const checkout = () => {
     if (!metodo) return setAlertaN((n) => n + 1);
-    if (metodo === "pix") {
-      setPixExpira(Date.now() + PIX_VALIDADE_MS);
-      return navegar("pix");
-    }
-    avisar("A confirmação do pagamento ainda não foi desenhada no Figma");
+    if (metodo === "pix")
+      return processar(() => {
+        setPixExpira(Date.now() + PIX_VALIDADE_MS);
+        navegar("pix", false);
+      });
+    processar(() => concluir(metodo));
   };
 
   const pacoteAberto = detalhe ? pacotePorId(detalhe) : undefined;
 
   return (
     <main className="relative mx-auto min-h-dvh w-full max-w-[430px] overflow-x-clip bg-white">
-      {carregando && tela !== "home" ? (
+      {tela === "processando" ? (
+        <ProcessingScreen />
+      ) : carregando && (tela === "catalogo" || tela === "carrinho" || tela === "pix") ? (
         <Skeleton tela={tela} />
       ) : carregando ? (
         <Skeleton tela="home" />
-      ) : tela === "home" ? (
+      ) : tela === "concluido" && pedido ? (
+        <SuccessScreen
+          pedido={pedido}
+          onVoltar={() => {
+            pilha.current = ["home"];
+            setTela("home");
+            window.scrollTo(0, 0);
+          }}
+          onAgendar={() => avisar("O agendamento ainda não foi desenhado no Figma")}
+        />
+      ) : tela === "home" || tela === "concluido" ? (
         <>
           <HomeScreen />
           <BottomNav onComprar={() => setSheetPessoa(true)} itensNoCarrinho={resumo(itens).quantidade} />
@@ -189,6 +230,7 @@ export default function Prototype() {
             itens={itens}
             metodo={metodo}
             cartaoFinal={cartaoFinal}
+            parcelas={parcelas}
             alertaN={alertaN}
             onMetodo={escolherMetodo}
             onVoltar={voltar}
@@ -197,6 +239,9 @@ export default function Prototype() {
           />
           {sheetCartao && (
             <NewCardSheet
+              totalCentavos={resumo(itens).totalPorCentavos}
+              parcelas={parcelas}
+              onParcelas={setParcelas}
               onFechar={fecharCartao}
               onConfirmar={(final4) => {
                 setCartaoFinal(final4);
@@ -216,6 +261,7 @@ export default function Prototype() {
             navigator.clipboard?.writeText(PIX_FICTICIO).catch(() => {});
             avisar("Código copiado. É fictício: este protótipo não gera cobrança.");
           }}
+          onSimularPagamento={() => concluir("pix")}
         />
       )}
 

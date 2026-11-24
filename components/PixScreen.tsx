@@ -5,7 +5,14 @@ import { BarraInferior, Header } from "@/components/ui";
 import { formatarBRL } from "@/lib/catalogo";
 import { mmss } from "@/lib/pagamento";
 
-type Props = { totalCentavos: number; expiraEm: number; onVoltar: () => void; onCopiar: () => void };
+type Props = {
+  totalCentavos: number;
+  expiraEm: number;
+  onVoltar: () => void;
+  onCopiar: () => void;
+  /** Protótipo: simula a confirmação do Pix pelo banco (não existe pagamento real). */
+  onSimularPagamento: () => void;
+};
 
 /**
  * QR apenas ilustrativo: padrão gerado sem dados (não é lido por leitores de QR).
@@ -39,7 +46,7 @@ function QrIlustrativo() {
 }
 
 /** Tela 10 — Aguardando pagamento via Pix (Figma 57:7293). */
-export default function PixScreen({ totalCentavos, expiraEm, onVoltar, onCopiar }: Props) {
+export default function PixScreen({ totalCentavos, expiraEm, onVoltar, onCopiar, onSimularPagamento }: Props) {
   const [agora, setAgora] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setAgora(Date.now()), 1000);
@@ -51,7 +58,9 @@ export default function PixScreen({ totalCentavos, expiraEm, onVoltar, onCopiar 
     <div className="flex min-h-dvh flex-col px-4 pb-[calc(110px+env(safe-area-inset-bottom))] leading-[normal]">
       <Header titulo="Aguardando pagamento" onVoltar={onVoltar} />
       <div className="mt-12 flex flex-col items-center gap-8 text-center">
-        <QrIlustrativo />
+        <button type="button" onClick={onSimularPagamento} disabled={restante <= 0} aria-label="QR code ilustrativo. Toque para simular o pagamento confirmado">
+          <QrIlustrativo />
+        </button>
         <div className="flex flex-col gap-2 leading-none">
           <p className="text-xl font-semibold">Total a pagar</p>
           <p className="text-[40px]">{formatarBRL(totalCentavos)}</p>
@@ -61,6 +70,7 @@ export default function PixScreen({ totalCentavos, expiraEm, onVoltar, onCopiar 
         <p className="text-xl leading-none font-semibold tabular-nums" aria-live="polite">
           {restante > 0 ? <>Expira em {mmss(restante)}</> : "Código expirado"}
         </p>
+        <p className="text-xs text-muted">Protótipo: toque no QR code para simular o pagamento confirmado.</p>
       </div>
       <BarraInferior>
         <button type="button" onClick={onCopiar} disabled={restante <= 0} className="h-12 w-full rounded-lg bg-cta text-base font-semibold text-white disabled:bg-[#e9e9e9] disabled:text-[#696969]">

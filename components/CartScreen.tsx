@@ -2,10 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { PacoteCard, type AcoesItem } from "@/components/CatalogScreen";
-import { BarraInferior, Header, Progresso, Selo, Stepper } from "@/components/ui";
+import { BarraInferior, Header, Progresso, Radio, Selo, Stepper } from "@/components/ui";
 import { asset } from "@/lib/asset";
 import { PACOTES, ehIndividual, formatarBRL, pacotePorId, percentualDesconto, precoItem, resumo, type Itens } from "@/lib/catalogo";
-import type { MetodoId } from "@/lib/pagamento";
+import { PARCELAS_MAX, textoParcela, type MetodoId } from "@/lib/pagamento";
 
 export type OpcaoMetodo = MetodoId | "novo";
 
@@ -14,6 +14,8 @@ type Props = AcoesItem & {
   metodo: MetodoId | null;
   /** 4 últimos dígitos do cartão adicionado nesta sessão. */
   cartaoFinal: string | null;
+  /** Parcelas escolhidas para o cartão (1 a PARCELAS_MAX). */
+  parcelas: number;
   /** Incrementa a cada "Continuar" sem método: mostra o alerta e rola até a seção. */
   alertaN: number;
   onMetodo: (m: OpcaoMetodo) => void;
@@ -21,13 +23,26 @@ type Props = AcoesItem & {
   onCheckout: () => void;
 };
 
-const iconeMetodo = (m: OpcaoMetodo) =>
+/** Ícone de cada método. O cartão salvo mostra a bandeira (Mastercard no protótipo). */
+export const iconeMetodo = (m: OpcaoMetodo) =>
   m === "pix" ? <img src={asset("/assets/pix.png")} width={16} height={16} alt="" />
   : m === "apple" ? <img src={asset("/assets/applepay.png")} width={24} height={24} alt="" />
+  : m === "cartao" ? <img src={asset("/assets/mastercard.svg")} width={32} height={32} alt="Mastercard" />
   : <img src={asset("/assets/cartao.svg")} width={16} height={16} alt="" />;
 
+/** Pix primeiro; depois o cartão salvo, novo cartão e Apple Pay. */
+export function opcoesMetodo(cartaoFinal: string | null, totalCentavos: number, parcelas: number) {
+  const opcoes: { id: OpcaoMetodo; nome: string; sub?: string }[] = [
+    { id: "pix", nome: "Pix" },
+    ...(cartaoFinal ? [{ id: "cartao" as const, nome: `**** ${cartaoFinal}`, sub: textoParcela(totalCentavos, parcelas, formatarBRL) }] : []),
+    { id: "novo", nome: "Novo cartão de crédito", sub: `Em até ${PARCELAS_MAX}x sem juros` },
+    { id: "apple", nome: "Apple Pay" },
+  ];
+  return opcoes;
+}
+
 /** Telas 6 a 9 — Revisar carrinho (Figma 57:5917): itens, método de pagamento, resumo, "Compre também". */
-export default function CartScreen({ itens, metodo, cartaoFinal, alertaN, onMetodo, onVoltar, onCheckout, ...acoes }: Props) {
+export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alertaN, onMetodo, onVoltar, onCheckout, ...acoes }: Props) {
   const r = resumo(itens);
   const ids = Object.keys(itens).filter((id) => pacotePorId(id));
   const sugestoes = PACOTES.filter((p) => !itens[p.id]);
@@ -40,12 +55,7 @@ export default function CartScreen({ itens, metodo, cartaoFinal, alertaN, onMeto
     secao.current?.scrollIntoView({ behavior: reduzir ? "auto" : "smooth", block: "start" });
   }, [alertaN]);
 
-  const opcoes: { id: OpcaoMetodo; nome: string }[] = [
-    ...(cartaoFinal ? [{ id: "cartao" as const, nome: `**** ${cartaoFinal}` }] : []),
-    { id: "novo", nome: "Novo cartão de crédito" },
-    { id: "pix", nome: "Pix" },
-    { id: "apple", nome: "Apple Pay" },
-  ];
+  const opcoes = opcoesMetodo(cartaoFinal, r.totalPorCentavos, parcelas);
 
   return (
     <div className="flex flex-col gap-8 px-4 pb-[calc(120px+env(safe-area-inset-bottom))] leading-[normal]">
@@ -108,13 +118,14 @@ export default function CartScreen({ itens, metodo, cartaoFinal, alertaN, onMeto
                     role="radio"
                     aria-checked={on}
                     onClick={() => onMetodo(o.id)}
-                    className={`flex h-12 items-center gap-3 px-3 text-left text-base ${i ? "border-t border-[#dcdcdc]" : ""}`}
+                    className={`flex h-[72px] items-center gap-3 px-3 text-left text-base ${i ? "border-t border-[#dcdcdc]" : ""}`}
                   >
                     <span className="grid size-10 shrink-0 place-items-center">{iconeMetodo(o.id)}</span>
-                    <span className="min-w-0 flex-1">{o.nome}</span>
-                    <span aria-hidden className={`size-5 shrink-0 rounded-full border border-muted ${on ? "p-[3px]" : ""}`}>
-                      {on && <span className="block size-full rounded-full bg-black" />}
+                    <span className="flex min-w-0 flex-1 flex-col gap-1">
+                      <span>{o.nome}</span>
+                      {o.sub && <span className="text-sm text-[#808080]">{o.sub}</span>}
                     </span>
+                    <Radio on={on} />
                   </button>
                 );
               })}

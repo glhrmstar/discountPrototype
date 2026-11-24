@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  consultasPorEspecialidade,
+  rotuloConsultas,
   LIMITE_POR_PACOTE,
   PACOTES,
   adicionar,
@@ -102,5 +104,23 @@ describe("formatação", () => {
   it("singular e plural", () => {
     expect(rotuloItens(1)).toBe("1 Item");
     expect(rotuloItens(3)).toBe("3 Itens");
+  });
+});
+
+describe("consultasPorEspecialidade", () => {
+  it("agrupa por especialidade e multiplica pela quantidade", () => {
+    expect(consultasPorEspecialidade({ "check-up": 1, psicologia: 2 })).toEqual([["Clínico geral", 1], ["Nutri", 1], ["Psicologia", 2]]);
+  });
+  it("soma a mesma especialidade de pacotes diferentes e tira o plural", () => {
+    expect(consultasPorEspecialidade({ "terapia-em-dia": 1, psicologia: 1, "check-up": 1, equilibrio: 1 })).toEqual([
+      ["Psicologia", 3], ["Clínico geral", 1], ["Nutri", 2], ["Endócrino", 1],
+    ]);
+  });
+  it("ignora ids desconhecidos e quantidades inválidas", () => {
+    expect(consultasPorEspecialidade({ nada: 2, psicologia: 0 })).toEqual([]);
+  });
+  it("rótulo singular e plural", () => {
+    expect(rotuloConsultas(1)).toBe("1 Consulta");
+    expect(rotuloConsultas(3)).toBe("3 Consultas");
   });
 });

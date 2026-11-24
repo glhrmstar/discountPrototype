@@ -101,9 +101,9 @@ export function mmss(ms: number): string {
   return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
 }
 
-/** Dados de exemplo do protótipo (fictícios: cartão de teste 4111…, CPF de exemplo). */
+/** Dados de exemplo do protótipo (fictícios: cartão de teste Mastercard 5555…, CPF de exemplo). */
 export const CARTAO_EXEMPLO: FormCartao = {
-  nome: "Maria Exemplo", cartao: "4111 1111 1111 1111", cpf: "123.456.789-09", venc: "12/29", cvv: "123",
+  nome: "Maria Exemplo", cartao: "5555 5555 5555 4444", cpf: "123.456.789-09", venc: "12/29", cvv: "123",
   cep: "01001-000", end: "Rua Exemplo", num: "100", bairro: "Centro", cidade: "São Paulo", uf: "SP", pais: "BR",
 };
 
@@ -124,3 +124,20 @@ export function prepararTeclado() {
 
 /** Código copiado no Pix do protótipo: fictício, não gera cobrança. */
 export const PIX_FICTICIO = "PIX-PROTOTIPO-STARBEM-SEM-VALOR";
+
+/** Parcelamento no cartão: até 2x sem juros (mock do Figma; validar com a regra de negócio). */
+export const PARCELAS_MAX = 2;
+
+/**
+ * Valor de cada parcela em centavos, arredondado para cima.
+ * Atenção: com total ímpar a soma das parcelas passa do total em 1 centavo (ex.: 13483 em 2x = 2 × 6742).
+ * A regra final (ex.: 1ª parcela absorve a diferença) precisa ser definida com o gateway.
+ */
+export const valorParcela = (totalCentavos: number, n: number) => Math.ceil(totalCentavos / Math.max(1, n));
+
+/** Ex.: "1x de R$ 99,90" ou "2x de R$ 49,95 sem juros". */
+export const textoParcela = (totalCentavos: number, n: number, brl: (c: number) => string) =>
+  `${n}x de ${brl(valorParcela(totalCentavos, n))}${n > 1 ? " sem juros" : ""}`;
+
+/** Tempo do loading "Processando dados de pagamentos" no protótipo (o real depende do gateway). */
+export const PROCESSANDO_MS = 2000;

@@ -131,3 +131,26 @@ export function formatarBRL(centavos: number): string {
 }
 
 export const rotuloItens = (n: number) => `${n} ${n === 1 ? "Item" : "Itens"}`;
+
+/**
+ * Consultas compradas agrupadas por especialidade (tela "Pagamento concluído").
+ * Ex.: Check-up + 2× Psicologia → [["Clínico geral", 1], ["Nutri", 1], ["Psicologia", 2]].
+ * As linhas do catálogo seguem o formato "<n> <Especialidade>" (plural com "s" quando n > 1).
+ */
+export function consultasPorEspecialidade(itens: Itens, pacotes: readonly Pacote[] = PACOTES): [string, number][] {
+  const porId = new Map(pacotes.map((p) => [p.id, p]));
+  const total = new Map<string, number>();
+  for (const [id, qtd] of Object.entries(itens)) {
+    const p = porId.get(id);
+    if (!p || !Number.isInteger(qtd) || qtd <= 0) continue;
+    for (const linha of p.linhas) {
+      const m = /^(\d+)\s+(.+)$/.exec(linha.trim());
+      const n = m ? Number(m[1]) : 1;
+      const nome = m ? (n > 1 ? m[2].replace(/s$/, "") : m[2]) : linha.trim();
+      total.set(nome, (total.get(nome) ?? 0) + n * qtd);
+    }
+  }
+  return [...total];
+}
+
+export const rotuloConsultas = (n: number) => `${n} ${n === 1 ? "Consulta" : "Consultas"}`;
