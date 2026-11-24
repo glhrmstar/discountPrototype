@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formValido, mascarar, mmss, ultimos4, type FormCartao } from "./pagamento";
+import { CARTAO_EXEMPLO, formValido, mascarar, mmss, ultimos4, type FormCartao } from "./pagamento";
 
 describe("máscaras", () => {
   it("cartão em grupos de 4, até 16 dígitos", () => {
@@ -26,6 +26,10 @@ describe("formValido", () => {
   };
   it("aceita sem complemento (opcional)", () => {
     expect(formValido(completo)).toBe(true);
+  });
+  it("dados de exemplo são válidos e já mascarados", () => {
+    expect(formValido(CARTAO_EXEMPLO)).toBe(true);
+    for (const [k, v] of Object.entries(CARTAO_EXEMPLO)) expect(mascarar(k as keyof FormCartao, v!)).toBe(v);
   });
   it("recusa campo obrigatório vazio", () => {
     expect(formValido({ ...completo, bairro: "  " })).toBe(false);

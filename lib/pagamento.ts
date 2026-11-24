@@ -101,5 +101,26 @@ export function mmss(ms: number): string {
   return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
 }
 
+/** Dados de exemplo do protótipo (fictícios: cartão de teste 4111…, CPF de exemplo). */
+export const CARTAO_EXEMPLO: FormCartao = {
+  nome: "Maria Exemplo", cartao: "4111 1111 1111 1111", cpf: "123.456.789-09", venc: "12/29", cvv: "123",
+  cep: "01001-000", end: "Rua Exemplo", num: "100", bairro: "Centro", cidade: "São Paulo", uf: "SP", pais: "BR",
+};
+
+/**
+ * iOS só abre o teclado se o foco acontecer dentro do toque. Foca um campo invisível já no toque;
+ * quando a gaveta monta, o foco passa para o campo real e o teclado continua aberto.
+ */
+export function prepararTeclado() {
+  if (typeof document === "undefined") return;
+  const t = document.createElement("input");
+  t.setAttribute("aria-hidden", "true");
+  t.tabIndex = -1;
+  t.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px;";
+  document.body.appendChild(t);
+  t.focus();
+  setTimeout(() => t.remove(), 1500);
+}
+
 /** Código copiado no Pix do protótipo: fictício, não gera cobrança. */
 export const PIX_FICTICIO = "PIX-PROTOTIPO-STARBEM-SEM-VALOR";
