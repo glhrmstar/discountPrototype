@@ -74,7 +74,7 @@ export default function Skeleton({ tela }: { tela: TelaComSkeleton }) {
     <div aria-busy="true" aria-label="Carregando" className="flex flex-col px-4">
       <Header titulo="Aguardando pagamento" />
       <div className="mt-12 flex flex-col items-center gap-8">
-        <K w="248px" h={248} r={12} />
+        <K w="180px" h={180} r={12} />
         <Col center><K w="140px" h={20} /><K w="190px" h={40} /></Col>
         <Col center><K w="320px" h={20} /><K w="280px" h={20} /><K w="200px" h={20} /></Col>
         <K w="170px" h={20} />

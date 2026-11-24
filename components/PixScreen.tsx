@@ -29,7 +29,7 @@ function QrIlustrativo() {
     </g>
   );
   return (
-    <svg viewBox="0 0 250 250" width={248} height={248} role="img" aria-label="QR code ilustrativo" shapeRendering="crispEdges">
+    <svg viewBox="0 0 250 250" width={180} height={180} role="img" aria-label="QR code ilustrativo" shapeRendering="crispEdges">
       {rects.map(([x, y]) => <rect key={`${x}.${y}`} x={x * 10} y={y * 10} width={10} height={10} />)}
       {finder(0, 0)}
       {finder(18, 0)}
