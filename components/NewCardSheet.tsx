@@ -45,7 +45,7 @@ export default function NewCardSheet({ onFechar, onConfirmar }: Props) {
           type="button"
           disabled={!ok}
           onClick={() => onConfirmar(ultimos4(form.cartao ?? ""))}
-          className="h-10 w-full rounded-lg bg-cta text-sm font-semibold text-white disabled:rounded disabled:bg-[#e9e9e9] disabled:font-medium disabled:text-[#696969]"
+          className="h-12 w-full rounded-lg bg-cta text-base font-semibold text-white disabled:rounded disabled:bg-[#e9e9e9] disabled:font-medium disabled:text-[#696969]"
         >
           Confirmar
         </button>
