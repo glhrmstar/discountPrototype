@@ -11,7 +11,7 @@ import PersonSheet from "@/components/PersonSheet";
 import PixScreen from "@/components/PixScreen";
 import Skeleton from "@/components/Skeletons";
 import { PESSOAS, adicionar, diminuir, pacotePorId, remover, resumo, type Filtro, type Itens } from "@/lib/catalogo";
-import { PIX_FICTICIO, type MetodoId } from "@/lib/pagamento";
+import { PIX_FICTICIO, prepararTeclado, type MetodoId } from "@/lib/pagamento";
 
 type Tela = "home" | "catalogo" | "carrinho" | "pix";
 
@@ -99,7 +99,10 @@ export default function Prototype() {
   };
 
   const escolherMetodo = (m: OpcaoMetodo) => {
-    if (m === "novo") return setSheetCartao(true);
+    if (m === "novo") {
+      prepararTeclado();
+      return setSheetCartao(true);
+    }
     setMetodo(m);
     setAlertaN(0);
   };
