@@ -4,10 +4,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import BottomNav from "@/components/BottomNav";
 import CartScreen, { type OpcaoMetodo } from "@/components/CartScreen";
 import CatalogScreen from "@/components/CatalogScreen";
+import ChangeMethodSheet from "@/components/ChangeMethodSheet";
 import HomeScreen from "@/components/HomeScreen";
 import NewCardSheet from "@/components/NewCardSheet";
+import NoticeSheet from "@/components/NoticeSheet";
 import PackageSheet from "@/components/PackageSheet";
 import PersonSheet from "@/components/PersonSheet";
+import { BotaoPrincipal } from "@/components/ui";
 import PixScreen from "@/components/PixScreen";
 import ProcessingScreen from "@/components/ProcessingScreen";
 import Skeleton from "@/components/Skeletons";
@@ -24,6 +27,7 @@ const PIX_VALIDADE_MS = 30 * 60 * 1000;
 /**
  * Fluxo: Home → Comprar → "Pra quem deseja comprar?" → Comprar consulta (+ detalhe do pacote)
  * → Revisar carrinho (método, resumo, Compre também) → Processando → Pix (QR) ou direto → Pagamento concluído.
+ * Falha no cartão: abra com ?falha=1 para simular a recusa (gaveta "Falha ao processar o pagamento").
  * Cada avanço mostra um skeleton por ~700 ms (simula a busca de dados). O voltar do celular volta uma tela.
  */
 export default function Prototype() {
@@ -39,6 +43,13 @@ export default function Prototype() {
   const [parcelas, setParcelas] = useState(1);
   const [pedido, setPedido] = useState<Pedido | null>(null);
   const [sheetCartao, setSheetCartao] = useState(false);
+  const [sheetTroca, setSheetTroca] = useState(false);
+  const [sheetFalha, setSheetFalha] = useState(false);
+  const [sheetSairPix, setSheetSairPix] = useState(false);
+  /** Tela atual para o handler do voltar do navegador (registrado uma vez). */
+  const telaAtual = useRef<Tela>("home");
+  /** true depois de "Sair" no aviso do Pix: o próximo voltar não pergunta de novo. */
+  const saindoPix = useRef(false);
   const [alertaN, setAlertaN] = useState(0);
   const [pixExpira, setPixExpira] = useState(0);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -70,8 +81,22 @@ export default function Prototype() {
   }, [salvoLido, itens, pessoa]);
 
   useEffect(() => {
+    telaAtual.current = tela;
+  }, [tela]);
+
+  useEffect(() => {
     carregar();
     const onPop = () => {
+      /* Figma 76:7563: sair do Pix pede confirmação, inclusive pelo voltar do navegador */
+      if (telaAtual.current === "pix" && !saindoPix.current) {
+        window.history.pushState(null, "");
+        setSheetSairPix(true);
+        return;
+      }
+      saindoPix.current = false;
+      setSheetSairPix(false);
+      setSheetTroca(false);
+      setSheetFalha(false);
       clearTimeout(timerProcessa.current);
       if (pilha.current.length > 1) pilha.current.pop();
       setTela(pilha.current[pilha.current.length - 1]);
@@ -109,6 +134,14 @@ export default function Prototype() {
   const fecharPessoa = useCallback(() => setSheetPessoa(false), []);
   const fecharDetalhe = useCallback(() => setDetalhe(null), []);
   const fecharCartao = useCallback(() => setSheetCartao(false), []);
+  const fecharTroca = useCallback(() => setSheetTroca(false), []);
+  const fecharFalha = useCallback(() => setSheetFalha(false), []);
+  const ficarNoPix = useCallback(() => setSheetSairPix(false), []);
+  const sairDoPix = () => {
+    setSheetSairPix(false);
+    saindoPix.current = true;
+    window.history.back();
+  };
 
   const acoes = {
     onComprar: (id: string) => {
@@ -158,7 +191,14 @@ export default function Prototype() {
         setPixExpira(Date.now() + PIX_VALIDADE_MS);
         navegar("pix", false);
       });
-    processar(() => concluir(metodo));
+    /* protótipo: ?falha=1 simula a recusa do cartão; o carrinho e o cartão continuam como estavam */
+    const falhar = metodo === "cartao" && new URLSearchParams(window.location.search).has("falha");
+    processar(() => {
+      if (!falhar) return concluir(metodo);
+      setTela("carrinho");
+      setCarregando(false);
+      setSheetFalha(true);
+    });
   };
 
   const pacoteAberto = detalhe ? pacotePorId(detalhe) : undefined;
@@ -233,6 +273,7 @@ export default function Prototype() {
             parcelas={parcelas}
             alertaN={alertaN}
             onMetodo={escolherMetodo}
+            onTrocarMetodo={() => setSheetTroca(true)}
             onVoltar={voltar}
             onCheckout={checkout}
             {...acoes}
@@ -251,18 +292,56 @@ export default function Prototype() {
               }}
             />
           )}
+          {sheetTroca && (
+            <ChangeMethodSheet
+              cartaoFinal={cartaoFinal}
+              metodoAtual={metodo}
+              totalCentavos={resumo(itens).totalPorCentavos}
+              parcelas={parcelas}
+              onParcelas={setParcelas}
+              onFechar={fecharTroca}
+              onConfirmar={(m) => {
+                setSheetTroca(false);
+                escolherMetodo(m);
+              }}
+            />
+          )}
+          {sheetFalha && (
+            <NoticeSheet
+              titulo="Falha ao processar o pagamento"
+              quebra={"Falha ao processar".length}
+              texto="Revise as informações do cartão"
+              onFechar={fecharFalha}
+              rodape={<BotaoPrincipal onClick={fecharFalha}>Entendi</BotaoPrincipal>}
+            />
+          )}
         </>
       ) : (
+        <>
         <PixScreen
           totalCentavos={resumo(itens).totalPorCentavos}
           expiraEm={pixExpira}
-          onVoltar={voltar}
+          onVoltar={() => setSheetSairPix(true)}
           onCopiar={() => {
             navigator.clipboard?.writeText(PIX_FICTICIO).catch(() => {});
             avisar("Código copiado. É fictício: este protótipo não gera cobrança.");
           }}
           onSimularPagamento={() => concluir("pix")}
         />
+        {sheetSairPix && (
+          <NoticeSheet
+            titulo="Tem certeza que deseja sair?"
+            texto="Se você fechar essa página, seu pagamento não será completado."
+            onFechar={ficarNoPix}
+            rodape={
+              <div className="flex gap-6">
+                <button type="button" onClick={sairDoPix} className="h-12 flex-1 rounded-lg border border-muted bg-white text-base font-medium">Sair</button>
+                <button type="button" onClick={ficarNoPix} className="h-12 flex-1 rounded-lg bg-cta text-base font-semibold text-white">Continuar</button>
+              </div>
+            }
+          />
+        )}
+        </>
       )}
 
       {aviso && (

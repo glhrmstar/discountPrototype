@@ -19,6 +19,8 @@ type Props = AcoesItem & {
   /** Incrementa a cada "Continuar" sem método: mostra o alerta e rola até a seção. */
   alertaN: number;
   onMetodo: (m: OpcaoMetodo) => void;
+  /** Toque no cartão escolhido: abre a gaveta "Método de pagamento" para trocar. */
+  onTrocarMetodo: () => void;
   onVoltar: () => void;
   onCheckout: () => void;
 };
@@ -42,7 +44,7 @@ export function opcoesMetodo(cartaoFinal: string | null, totalCentavos: number, 
 }
 
 /** Telas 6 a 9 — Revisar carrinho (Figma 57:5917): itens, método de pagamento, resumo, "Compre também". */
-export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alertaN, onMetodo, onVoltar, onCheckout, ...acoes }: Props) {
+export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alertaN, onMetodo, onTrocarMetodo, onVoltar, onCheckout, ...acoes }: Props) {
   const r = resumo(itens);
   const ids = Object.keys(itens).filter((id) => pacotePorId(id));
   const sugestoes = PACOTES.filter((p) => !itens[p.id]);
@@ -101,35 +103,52 @@ export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alert
         <>
           <section ref={secao} className="flex scroll-mt-[120px] flex-col gap-4" aria-labelledby="pag-titulo">
             <h2 id="pag-titulo" className="text-base font-semibold">Método de pagamento</h2>
-            <div
-              key={alertaN}
-              role="radiogroup"
-              aria-labelledby="pag-titulo"
-              aria-invalid={alerta || undefined}
-              aria-describedby={alerta ? "pag-erro" : undefined}
-              className={`flex flex-col overflow-hidden rounded-xl border bg-white ${alerta ? "animate-shake border-cta shadow-[0_0_0_3px_rgba(255,81,0,0.18)]" : "border-[#dcdcdc]"}`}
-            >
-              {opcoes.map((o, i) => {
-                const on = metodo === o.id;
-                return (
-                  <button
-                    key={o.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={on}
-                    onClick={() => onMetodo(o.id)}
-                    className={`flex h-[72px] items-center gap-3 px-3 text-left text-base ${i ? "border-t border-[#dcdcdc]" : ""}`}
-                  >
-                    <span className="grid size-10 shrink-0 place-items-center">{iconeMetodo(o.id)}</span>
-                    <span className="flex min-w-0 flex-1 flex-col gap-1">
-                      <span>{o.nome}</span>
-                      {o.sub && <span className="text-sm text-[#808080]">{o.sub}</span>}
-                    </span>
-                    <Radio on={on} />
-                  </button>
-                );
-              })}
-            </div>
+            {metodo === "cartao" && cartaoFinal ? (
+              /* Figma 57:5253: com o cartão adicionado, só ele aparece; a seta abre a troca de método */
+              <button
+                type="button"
+                onClick={onTrocarMetodo}
+                aria-label={`Cartão final ${cartaoFinal}, ${textoParcela(r.totalPorCentavos, parcelas, formatarBRL)}. Trocar método de pagamento`}
+                className="flex min-h-14 items-center gap-3 rounded-xl border border-[#dcdcdc] px-3 py-1.5 text-left"
+              >
+                <span className="grid size-10 shrink-0 place-items-center">{iconeMetodo("cartao")}</span>
+                <span className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="text-base">**** {cartaoFinal}</span>
+                  <span className="text-sm text-[#808080]">{textoParcela(r.totalPorCentavos, parcelas, formatarBRL)}</span>
+                </span>
+                <img src={asset("/assets/seta-dir.svg")} width={16} height={16} alt="" className="shrink-0" />
+              </button>
+            ) : (
+              <div
+                key={alertaN}
+                role="radiogroup"
+                aria-labelledby="pag-titulo"
+                aria-invalid={alerta || undefined}
+                aria-describedby={alerta ? "pag-erro" : undefined}
+                className={`flex flex-col overflow-hidden rounded-xl border bg-white ${alerta ? "animate-shake border-cta shadow-[0_0_0_3px_rgba(255,81,0,0.18)]" : "border-[#dcdcdc]"}`}
+              >
+                {opcoes.map((o, i) => {
+                  const on = metodo === o.id;
+                  return (
+                    <button
+                      key={o.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={on}
+                      onClick={() => onMetodo(o.id)}
+                      className={`flex h-[72px] items-center gap-3 px-3 text-left text-base ${i ? "border-t border-[#dcdcdc]" : ""}`}
+                    >
+                      <span className="grid size-10 shrink-0 place-items-center">{iconeMetodo(o.id)}</span>
+                      <span className="flex min-w-0 flex-1 flex-col gap-1">
+                        <span>{o.nome}</span>
+                        {o.sub && <span className="text-sm text-[#808080]">{o.sub}</span>}
+                      </span>
+                      <Radio on={on} />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
             {alerta && <p id="pag-erro" role="alert" className="-mt-1 text-sm text-[#d92d20]">Selecione um método de pagamento para continuar.</p>}
           </section>
 

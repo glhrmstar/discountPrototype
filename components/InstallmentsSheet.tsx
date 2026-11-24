@@ -34,3 +34,22 @@ export default function InstallmentsSheet({ totalCentavos, selecionada, onFechar
     </Sheet>
   );
 }
+
+/** Campo "Parcelas" (Novo cartão e Trocar método): mostra a escolha atual e abre a gaveta de parcelas. */
+export function CampoParcelas({ texto, onAbrir }: { texto: string; onAbrir: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-haspopup="dialog"
+      aria-label={`Parcelas: ${texto}`}
+      onClick={onAbrir}
+      className="flex h-14 w-full flex-wrap content-center items-center gap-x-2 rounded-2xl border border-[#b6b6b6] bg-[#f7f7f7] px-4 py-2 text-left shadow-[0_1px_2px_rgba(12,17,29,0.1)]"
+    >
+      <span className="basis-full text-xs leading-4 text-[#9c9c9c]">Parcelas</span>
+      <span className="flex-1 text-base leading-6">{texto}</span>
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden className="flex-none">
+        <path d="M5 7.5 10 12.5 15 7.5" fill="none" stroke="#808080" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  );
+}
