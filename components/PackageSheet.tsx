@@ -1,7 +1,7 @@
 "use client";
 
 import { BotaoVerCarrinho, Progresso, Selo, Sheet, Stepper, Totais } from "@/components/ui";
-import { ehIndividual, formatarBRL, percentualDesconto, precoItem, type Itens, type Pacote } from "@/lib/catalogo";
+import { ehIndividual, formatarBRL, linhasItem, percentualDesconto, precoItem, type Itens, type Pacote } from "@/lib/catalogo";
 
 type Props = {
   pacote: Pacote;
@@ -24,13 +24,14 @@ export default function PackageSheet({ pacote: p, itens, onMais, onMenos, onLimp
       <div className="flex flex-col gap-12">
         <div className="flex h-[180px] flex-col justify-end gap-6 overflow-hidden rounded-xl p-6 text-wine" style={{ background: "linear-gradient(167.9deg,#fff5e7 33.39%,#ffc992 150.93%),#fff5e7" }}>
           {p.tag && (
-            <div className="flex items-center justify-between">
+            /* mb-auto: tag no topo; as consultas ficam embaixo mesmo com uma linha só */
+            <div className="mb-auto flex items-center justify-between">
               <span className="text-base font-bold whitespace-nowrap">{p.tag}</span>
               <Selo pct={percentualDesconto(p)} />
             </div>
           )}
           <div className="flex flex-col gap-1 text-[32px]">
-            {p.linhas.map((l) => <span key={l}>{l}</span>)}
+            {linhasItem(p, qtd).map((l) => <span key={l}>{l}</span>)}
           </div>
         </div>
         {ehIndividual(p) && <Progresso qtd={qtd} />}

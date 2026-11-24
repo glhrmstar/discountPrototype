@@ -42,11 +42,14 @@ export default function SuccessScreen({ pedido, onVoltar, onAgendar }: Props) {
         </h1>
       </div>
 
-      <ul aria-label="Consultas compradas" {...entra(1)} className="entra flex flex-col divide-y divide-[#dcdcdc] overflow-hidden rounded-xl border border-[#dcdcdc] text-base">
-        {consultas.map(([nome, n]) => (
-          <li key={nome} className={linha}><span className="min-w-0 flex-1">{nome}</span><span className="whitespace-nowrap">{rotuloConsultas(n)}</span></li>
-        ))}
-      </ul>
+      <section {...entra(1)} className="entra flex flex-col gap-4">
+        <h2 id="consultas-titulo" className="text-base font-semibold">Consultas</h2>
+        <ul aria-labelledby="consultas-titulo" className="flex flex-col divide-y divide-[#dcdcdc] overflow-hidden rounded-xl border border-[#dcdcdc] text-base">
+          {consultas.map(([nome, n]) => (
+            <li key={nome} className={linha}><span className="min-w-0 flex-1">{nome}</span><span className="whitespace-nowrap">{rotuloConsultas(n)}</span></li>
+          ))}
+        </ul>
+      </section>
 
       <section {...entra(2)} className="entra flex flex-col gap-4">
         <h2 className="text-base font-semibold">Método de pagamento</h2>

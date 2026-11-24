@@ -10,7 +10,10 @@ export type Pacote = {
   id: string;
   /** Nome da campanha. Pacotes com tag têm desconto fixo; sem tag são consultas individuais. */
   tag?: string;
-  /** Consultas incluídas, uma por linha (o card reserva sempre duas linhas). */
+  /**
+   * Consultas incluídas em 1 unidade, uma por linha (o card reserva sempre duas linhas).
+   * Pacotes: "<n> <Especialidade>". Individuais: só o nome; a quantidade vem do contador (ver linhasItem).
+   */
   linhas: [string] | [string, string];
   precoDeCentavos: number;
   /** Preço com desconto fixo (pacotes de campanha). Individuais usam as FAIXAS. */
@@ -35,8 +38,8 @@ export const PACOTES: readonly Pacote[] = [
   { id: "check-up", tag: "Check-up", linhas: ["1 Clínico geral", "1 Nutri"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
   { id: "equilibrio", tag: "Equilíbrio", linhas: ["1 Endócrino", "1 Nutri"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
   { id: "mental", tag: "Mental", linhas: ["1 Psiquiatria", "2 Psicologias"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
-  { id: "psicologia", linhas: ["1 Psicologia"], precoDeCentavos: 4990, precoPorCentavos: 4990 },
-  { id: "especialista", linhas: ["1 Especialista"], precoDeCentavos: 4990, precoPorCentavos: 4990 },
+  { id: "psicologia", linhas: ["Psicologia"], precoDeCentavos: 4990, precoPorCentavos: 4990 },
+  { id: "especialista", linhas: ["Especialista"], precoDeCentavos: 4990, precoPorCentavos: 4990 },
 ];
 
 export const pacotePorId = (id: string) => PACOTES.find((p) => p.id === id);
@@ -135,7 +138,7 @@ export const rotuloItens = (n: number) => `${n} ${n === 1 ? "Item" : "Itens"}`;
 /**
  * Consultas compradas agrupadas por especialidade (tela "Pagamento concluído").
  * Ex.: Check-up + 2× Psicologia → [["Clínico geral", 1], ["Nutri", 1], ["Psicologia", 2]].
- * As linhas do catálogo seguem o formato "<n> <Especialidade>" (plural com "s" quando n > 1).
+ * As linhas do catálogo seguem o formato "<n> <Especialidade>" (plural com "s" quando n > 1); sem número, conta 1.
  */
 export function consultasPorEspecialidade(itens: Itens, pacotes: readonly Pacote[] = PACOTES): [string, number][] {
   const porId = new Map(pacotes.map((p) => [p.id, p]));
@@ -154,3 +157,24 @@ export function consultasPorEspecialidade(itens: Itens, pacotes: readonly Pacote
 }
 
 export const rotuloConsultas = (n: number) => `${n} ${n === 1 ? "Consulta" : "Consultas"}`;
+
+/** Plural das especialidades que mudam ("2 Psicologias"); as demais ficam iguais ("2 Nutri", "2 Clínico geral"). */
+const PLURAL: Readonly<Record<string, string>> = { Psicologia: "Psicologias", Psiquiatria: "Psiquiatrias", Especialista: "Especialistas" };
+const SINGULAR: Readonly<Record<string, string>> = Object.fromEntries(Object.entries(PLURAL).map(([s, p]) => [p, s]));
+
+/**
+ * Linhas do item multiplicadas pela quantidade (carrinho, detalhe e card já adicionado).
+ * Ex.: Check-up ×2 → ["2 Clínico geral", "2 Nutri"]; Terapia em dia ×2 → ["4 Psicologias"].
+ * Individual: com 1 unidade só o nome ("Psicologia"); a partir de 2, "2 Psicologias". Sem quantidade, as linhas do catálogo.
+ */
+export function linhasItem(p: Pacote, qtd: number): string[] {
+  if (!Number.isInteger(qtd) || qtd <= 0) return [...p.linhas];
+  return p.linhas.map((linha) => {
+    const m = /^(\d+)\s+(.+)$/.exec(linha.trim());
+    const nomeLinha = m ? m[2] : linha.trim();
+    const base = SINGULAR[nomeLinha] ?? nomeLinha;
+    const n = (m ? Number(m[1]) : 1) * qtd;
+    if (ehIndividual(p) && n === 1) return base;
+    return `${n} ${n > 1 ? (PLURAL[base] ?? base) : base}`;
+  });
+}
