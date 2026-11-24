@@ -1,6 +1,6 @@
 /**
- * Catálogo e carrinho do protótipo "Compra avulsa".
- * Pacotes e preços são o mock do Figma (R$ 100,00 → R$ 50,00): substituir pela API antes de produção.
+ * Catálogo, carrinho e regras de preço do protótipo "Compra avulsa".
+ * Preços e faixas são o mock do Figma: substituir pela API/regra de negócio antes de produção.
  * Valores sempre em centavos para não acumular erro de ponto flutuante.
  */
 
@@ -8,11 +8,12 @@ export type Filtro = "todos" | "descontos" | "individuais";
 
 export type Pacote = {
   id: string;
-  /** Nome da campanha; só os pacotes com desconto têm. */
+  /** Nome da campanha. Pacotes com tag têm desconto fixo; sem tag são consultas individuais. */
   tag?: string;
   /** Consultas incluídas, uma por linha (o card reserva sempre duas linhas). */
   linhas: [string] | [string, string];
   precoDeCentavos: number;
+  /** Preço com desconto fixo (pacotes de campanha). Individuais usam as FAIXAS. */
   precoPorCentavos: number;
 };
 
@@ -31,17 +32,46 @@ export const PESSOAS: readonly Pessoa[] = [
 
 export const PACOTES: readonly Pacote[] = [
   { id: "terapia-em-dia", tag: "Terapia em dia", linhas: ["2 Psicologias"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
-  { id: "check-up", tag: "Check-up", linhas: ["1 Clinico geral", "1 Nutri"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
-  { id: "equilibrio", tag: "Equilibrio", linhas: ["1 Endocrino", "1 Nutri"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
+  { id: "check-up", tag: "Check-up", linhas: ["1 Clínico geral", "1 Nutri"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
+  { id: "equilibrio", tag: "Equilíbrio", linhas: ["1 Endócrino", "1 Nutri"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
   { id: "mental", tag: "Mental", linhas: ["1 Psiquiatria", "2 Psicologias"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
-  { id: "psicologia", linhas: ["1 Psicologia"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
-  { id: "especialista", linhas: ["1 Especialista"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
+  { id: "psicologia", linhas: ["1 Psicologia"], precoDeCentavos: 4990, precoPorCentavos: 4990 },
+  { id: "especialista", linhas: ["1 Especialista"], precoDeCentavos: 4990, precoPorCentavos: 4990 },
 ];
 
-/** Percentual de desconto arredondado; 0 quando não há desconto. */
-export function percentualDesconto(p: Pacote): number {
+export const pacotePorId = (id: string) => PACOTES.find((p) => p.id === id);
+export const ehIndividual = (p: Pacote) => !p.tag;
+
+/** Desconto progressivo das consultas individuais: [consultas, % de desconto]. Contado por item. */
+export const FAIXAS: readonly (readonly [number, number])[] = [
+  [2, 15],
+  [4, 20],
+  [6, 25],
+  [8, 30],
+];
+
+export function descontoIndividual(qtd: number): number {
+  return FAIXAS.reduce((pct, [min, p]) => (qtd >= min ? p : pct), 0);
+}
+
+/** Próxima faixa ainda não atingida, ou undefined se já está na máxima. */
+export function proximaFaixa(qtd: number): { faltam: number; pct: number } | undefined {
+  const f = FAIXAS.find(([min]) => qtd < min);
+  return f ? { faltam: f[0] - qtd, pct: f[1] } : undefined;
+}
+
+/** Percentual exibido no selo do pacote (0 quando não há desconto). */
+export function percentualDesconto(p: Pacote, qtd = 1): number {
+  if (ehIndividual(p)) return descontoIndividual(qtd);
   if (p.precoDeCentavos <= 0 || p.precoPorCentavos >= p.precoDeCentavos) return 0;
   return Math.round((1 - p.precoPorCentavos / p.precoDeCentavos) * 100);
+}
+
+/** Preço de uma linha do carrinho (pacote × quantidade). */
+export function precoItem(p: Pacote, qtd: number): { deCentavos: number; porCentavos: number } {
+  const de = p.precoDeCentavos * qtd;
+  if (ehIndividual(p)) return { deCentavos: de, porCentavos: Math.round((de * (100 - descontoIndividual(qtd))) / 100) };
+  return { deCentavos: de, porCentavos: p.precoPorCentavos * qtd };
 }
 
 /** "Descontos" = pacotes de campanha (com tag); "Individuais" = os demais. */
@@ -59,7 +89,14 @@ export function adicionar(itens: Itens, id: string): Itens {
   return { ...itens, [id]: atual + 1 };
 }
 
-/** Remove o pacote inteiro do carrinho (ação da lixeira). */
+/** Tira uma unidade; com 1 unidade, remove o pacote. */
+export function diminuir(itens: Itens, id: string): Itens {
+  const atual = itens[id] ?? 0;
+  if (atual <= 1) return remover(itens, id);
+  return { ...itens, [id]: atual - 1 };
+}
+
+/** Remove o pacote inteiro do carrinho (lixeira e "Limpar"). */
 export function remover(itens: Itens, id: string): Itens {
   if (!(id in itens)) return itens;
   const { [id]: _removido, ...resto } = itens;
@@ -75,10 +112,11 @@ export function resumo(itens: Itens, pacotes: readonly Pacote[] = PACOTES): Resu
     (acc, [id, qtd]) => {
       const p = porId.get(id);
       if (!p || !Number.isInteger(qtd) || qtd <= 0) return acc;
+      const v = precoItem(p, qtd);
       return {
         quantidade: acc.quantidade + qtd,
-        totalDeCentavos: acc.totalDeCentavos + p.precoDeCentavos * qtd,
-        totalPorCentavos: acc.totalPorCentavos + p.precoPorCentavos * qtd,
+        totalDeCentavos: acc.totalDeCentavos + v.deCentavos,
+        totalPorCentavos: acc.totalPorCentavos + v.porCentavos,
       };
     },
     { quantidade: 0, totalDeCentavos: 0, totalPorCentavos: 0 },

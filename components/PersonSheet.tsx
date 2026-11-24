@@ -44,8 +44,8 @@ export default function PersonSheet({ selecionada, onSelecionar, onFechar, onCon
           </div>
           <div className="flex flex-col gap-2">
             <h2 id="sheet-titulo" className="text-2xl font-semibold">Pra quem deseja comprar?</h2>
-            {/* Texto do Figma mantido; "desja" está com erro de digitação no design. */}
-            <p className="text-base text-muted">Selecione a pessoa para quem desja comprar a consulta</p>
+            {/* Figma: "desja" (corrigido) */}
+            <p className="text-base text-muted">Selecione a pessoa para quem deseja comprar a consulta</p>
           </div>
         </div>
 
