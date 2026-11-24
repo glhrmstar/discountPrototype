@@ -76,7 +76,7 @@ export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alert
             <article key={id} aria-label={nome} className="flex flex-col gap-4 overflow-hidden rounded-xl border border-[#dcdcdc] p-3">
               {(p.tag || pct > 0) && (
                 <div className={`flex items-center ${p.tag ? "justify-between" : "justify-end"}`}>
-                  {p.tag && <span className="text-[10px] font-bold whitespace-nowrap">{p.tag}</span>}
+                  {p.tag && <span className="text-sm font-bold whitespace-nowrap">{p.tag}</span>}
                   <Selo pct={pct} />
                 </div>
               )}

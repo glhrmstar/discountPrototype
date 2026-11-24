@@ -53,12 +53,11 @@ export default function SuccessScreen({ pedido, onVoltar, onAgendar }: Props) {
 
       <section {...entra(2)} className="entra flex flex-col gap-4">
         <h2 className="text-base font-semibold">Método de pagamento</h2>
-        <div className="flex min-h-14 items-center gap-3 rounded-xl border border-[#dcdcdc] px-3 py-1.5">
+        {/* Método numa linha só; no cartão, as parcelas ficam à direita em cinza */}
+        <div className="flex h-14 items-center gap-3 rounded-xl border border-[#dcdcdc] px-3">
           <span className="grid size-10 shrink-0 place-items-center">{iconeMetodo(pedido.metodo)}</span>
-          <span className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="text-base">{nomeMetodo}</span>
-            {pedido.metodo === "cartao" && <span className="text-sm text-[#808080]">{textoParcela(r.totalPorCentavos, pedido.parcelas, formatarBRL)}</span>}
-          </span>
+          <span className="min-w-0 flex-1 truncate text-base">{nomeMetodo}</span>
+          {pedido.metodo === "cartao" && <span className="shrink-0 text-base whitespace-nowrap text-[#808080]">{textoParcela(r.totalPorCentavos, pedido.parcelas, formatarBRL)}</span>}
         </div>
       </section>
 

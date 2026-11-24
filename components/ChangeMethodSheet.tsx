@@ -1,11 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { iconeMetodo, type OpcaoMetodo } from "@/components/CartScreen";
-import InstallmentsSheet, { CampoParcelas } from "@/components/InstallmentsSheet";
+import InstallmentsDropdown from "@/components/InstallmentsDropdown";
 import { BotaoPrincipal, Radio, Sheet } from "@/components/ui";
-import { formatarBRL } from "@/lib/catalogo";
-import { textoParcela, type MetodoId } from "@/lib/pagamento";
+import type { MetodoId } from "@/lib/pagamento";
 
 type Props = {
   cartaoFinal: string | null;
@@ -20,13 +19,11 @@ type Props = {
 
 /**
  * Tela 8.A — gaveta "Método de pagamento" (Figma 57:6925), aberta ao tocar no cartão escolhido.
- * Cartão salvo primeiro; quando ele está marcado, o campo de parcelas aparece logo abaixo.
+ * Cartão salvo primeiro; quando ele está marcado, o dropdown de parcelas aparece logo abaixo.
  * Figma: o título repetia "Novo cartão"; aqui é "Método de pagamento".
  */
 export default function ChangeMethodSheet({ cartaoFinal, metodoAtual, totalCentavos, parcelas, onParcelas, onFechar, onConfirmar }: Props) {
   const [sel, setSel] = useState<OpcaoMetodo | null>(metodoAtual);
-  const [parcelasAberta, setParcelasAberta] = useState(false);
-  const fecharParcelas = useCallback(() => setParcelasAberta(false), []);
   const opcoes: { id: OpcaoMetodo; nome: string }[] = [
     ...(cartaoFinal ? [{ id: "cartao" as const, nome: `**** ${cartaoFinal}` }] : []),
     { id: "novo", nome: "Novo cartão de crédito" },
@@ -47,24 +44,13 @@ export default function ChangeMethodSheet({ cartaoFinal, metodoAtual, totalCenta
               </button>
               {o.id === "cartao" && sel === "cartao" && (
                 <div className="px-3 pt-2 pb-1">
-                  <CampoParcelas texto={textoParcela(totalCentavos, parcelas, formatarBRL)} onAbrir={() => setParcelasAberta(true)} />
+                  <InstallmentsDropdown totalCentavos={totalCentavos} parcelas={parcelas} onParcelas={onParcelas} />
                 </div>
               )}
             </div>
           ))}
         </div>
       </Sheet>
-      {parcelasAberta && (
-        <InstallmentsSheet
-          totalCentavos={totalCentavos}
-          selecionada={parcelas}
-          onFechar={fecharParcelas}
-          onConfirmar={(n) => {
-            onParcelas(n);
-            setParcelasAberta(false);
-          }}
-        />
-      )}
     </>
   );
 }
