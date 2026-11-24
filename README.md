@@ -11,15 +11,18 @@ Protótipo mobile da **nova UX de descontos B2C (compra avulsa)** da Starbem, fe
 3. **Comprar consulta**: filtre por Todos / Descontos / Individuais e toque em **Comprar agora**.
 4. **Detalhe do pacote** (gaveta): pacotes com desconto mostram o preço com 50% OFF; consultas individuais mostram o **desconto progressivo** (2/4/6/8 consultas → 15/20/25/30%). Use **+**/**−**, a lixeira ou **Limpar**.
 5. **Item adicionado**: tocar no card reabre o detalhe; a barra mostra o total e **Ver carrinho**.
-6. **Revisar carrinho**: itens, **Método de pagamento** (radios), **Resumo dos valores** e **Compre também** (carrossel).
-   - "Novo cartão de crédito" abre a gaveta **Novo cartão** já com **dados de exemplo** (fictícios) e o foco no primeiro campo, para o teclado do celular subir junto. Os campos têm máscara; ao confirmar, o cartão entra na lista como `**** 1234`.
+6. **Revisar carrinho**: itens, **Método de pagamento** (radios: Pix, cartão salvo, novo cartão, Apple Pay), **Resumo dos valores** e **Compre também** (carrossel).
+   - "Novo cartão de crédito" abre a gaveta **Novo cartão** já com **dados de exemplo** (fictícios, cartão de teste Mastercard) e o foco no primeiro campo, para o teclado do celular subir junto. Os campos têm máscara.
+   - O campo **Parcelas** abre uma gaveta por cima com 1x ou 2x sem juros. Ao confirmar, o cartão entra na lista como `**** 4444` com a bandeira e as parcelas.
    - O checkout tem um botão só, **Confirmar e pagar**, sempre habilitado: sem método escolhido, a lista ganha destaque e a tela rola até ela.
-7. **Aguardando pagamento (Pix)**: QR ilustrativo, total, contagem regressiva de 30 min e **Copiar código** (fictício).
+7. **Processando dados de pagamentos**: loading de ~2 s depois de **Confirmar e pagar**.
+8. **Aguardando pagamento (Pix)**: QR ilustrativo, total, contagem regressiva de 30 min e **Copiar código** (fictício). Tocar no QR simula a confirmação do pagamento.
+9. **Pagamento concluído**: consultas compradas por especialidade, método usado e resumo dos valores. Cartão e Apple Pay chegam aqui direto depois do loading. O carrinho é esvaziado; **Voltar** leva à Home e **Agendar consulta** mostra um aviso (tela ainda não desenhada).
 
 O **carrinho fica salvo**: sair do fluxo de compra (ou fechar a página) não o esvazia. Na Home, o "Comprar" mostra quantos itens estão salvos, e ao voltar o catálogo já abre com eles. Fica no `localStorage` do navegador por 7 dias, só com pacotes, quantidades e a pessoa escolhida.
 
 Cada avanço mostra um **skeleton** por ~700 ms, simulando a busca de dados. O voltar do celular volta uma tela.
-A confirmação de pagamento com cartão/Apple Pay ainda não tem tela no Figma e mostra um aviso.
+Nenhum pagamento é real: o loading e a confirmação são simulados.
 
 ## Rodar localmente
 
@@ -49,13 +52,15 @@ O workflow define `NEXT_PUBLIC_BASE_PATH=/<nome-do-repo>`; se renomear o reposit
 | `components/PersonSheet.tsx` | Tela 2 (bottom sheet) |
 | `components/CatalogScreen.tsx` | Telas 3 e 5 (catálogo, card, barra do carrinho) |
 | `components/PackageSheet.tsx` | Tela 4 (detalhe do pacote) |
-| `components/CartScreen.tsx`, `NewCardSheet.tsx` | Telas 6 a 9 (Revisar carrinho e Novo cartão) |
-| `components/PixScreen.tsx` | Tela 10 (Pix) |
+| `components/CartScreen.tsx`, `NewCardSheet.tsx`, `InstallmentsSheet.tsx` | Telas 6 a 9 (Revisar carrinho, Novo cartão e Parcelas) |
+| `components/ProcessingScreen.tsx` | Loading "Processando dados de pagamentos" |
+| `components/PixScreen.tsx` | Pix (QR) |
+| `components/SuccessScreen.tsx` | Pagamento concluído |
 | `components/Skeletons.tsx` | Skeletons de carregamento |
 | `components/ui.tsx` | Peças compartilhadas: Sheet, Header, Stepper, Progresso, Totais, Selo |
 | `lib/catalogo.ts` | Pacotes, faixas de desconto e regras do carrinho (valores em centavos) |
 | `lib/carrinhoSalvo.ts` | Salvar/ler o carrinho no navegador (validação e validade de 7 dias) |
-| `lib/pagamento.ts` | Campos do cartão, máscaras, validação e utilitários do Pix |
+| `lib/pagamento.ts` | Campos do cartão, máscaras, validação, parcelas e utilitários do Pix |
 | `public/assets/` | Ícones e imagens exportados do Figma |
 
 ## Pendências conhecidas

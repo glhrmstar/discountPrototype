@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CARTAO_EXEMPLO, formValido, mascarar, mmss, ultimos4, type FormCartao } from "./pagamento";
+import { CARTAO_EXEMPLO, formValido, mascarar, mmss, textoParcela, ultimos4, valorParcela, type FormCartao } from "./pagamento";
 
 describe("máscaras", () => {
   it("cartão em grupos de 4, até 16 dígitos", () => {
@@ -47,5 +47,21 @@ describe("utilitários", () => {
     expect(mmss(30 * 60 * 1000)).toBe("30:00");
     expect(mmss(61_500)).toBe("01:02");
     expect(mmss(-5)).toBe("00:00");
+  });
+});
+
+describe("parcelas", () => {
+  const brl = (c: number) => `R$ ${(c / 100).toFixed(2).replace(".", ",")}`;
+  it("arredonda a parcela para cima", () => {
+    expect(valorParcela(9990, 2)).toBe(4995);
+    expect(valorParcela(13483, 2)).toBe(6742);
+    expect(valorParcela(5000, 0)).toBe(5000);
+  });
+  it("texto com 'sem juros' só a partir de 2x", () => {
+    expect(textoParcela(9990, 1, brl)).toBe("1x de R$ 99,90");
+    expect(textoParcela(9990, 2, brl)).toBe("2x de R$ 49,95 sem juros");
+  });
+  it("cartão de exemplo é Mastercard de teste", () => {
+    expect(ultimos4(CARTAO_EXEMPLO.cartao!)).toBe("4444");
   });
 });

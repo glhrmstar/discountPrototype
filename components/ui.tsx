@@ -136,31 +136,47 @@ type SheetProps = {
   children: ReactNode;
   /** Espaço entre os blocos do conteúdo (Figma usa 32 ou 48). */
   gap?: "gap-8" | "gap-12";
+  /** Gaveta aberta por cima de outra gaveta (ex.: Parcelas sobre Novo cartão). */
+  topo?: boolean;
 };
 
+/** Gavetas abertas, da mais antiga para a mais nova: Esc fecha só a de cima. */
+const abertas: symbol[] = [];
+
 /** Gaveta inferior com fundo escuro; rola por dentro quando o conteúdo passa da tela. Esc e toque fora fecham. */
-export function Sheet({ onFechar, titulo, rotulo, rodape, children, gap = "gap-8" }: SheetProps) {
+export function Sheet({ onFechar, titulo, rotulo, rodape, children, gap = "gap-8", topo }: SheetProps) {
   const fechar = useRef<HTMLButtonElement>(null);
+  const aoFechar = useRef(onFechar);
   useEffect(() => {
+    aoFechar.current = onFechar;
+  });
+  useEffect(() => {
+    const id = Symbol("sheet");
+    abertas.push(id);
     const anterior = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const foco = document.activeElement as HTMLElement | null;
     fechar.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onFechar();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && abertas[abertas.length - 1] === id) aoFechar.current();
+    };
     window.addEventListener("keydown", onKey);
     return () => {
+      abertas.splice(abertas.indexOf(id), 1);
       document.body.style.overflow = anterior;
       window.removeEventListener("keydown", onKey);
+      if (topo) foco?.focus({ preventScroll: true }); /* devolve o foco para quem abriu a gaveta de cima */
     };
-  }, [onFechar]);
+  }, [topo]);
 
   return (
     <>
-      <div className="fixed inset-0 z-20 animate-fade-in bg-black/50" onClick={onFechar} aria-hidden />
+      <div className={`fixed inset-0 animate-fade-in bg-black/50 ${topo ? "z-40" : "z-20"}`} onClick={onFechar} aria-hidden />
       <div
         role="dialog"
         aria-modal="true"
         aria-label={rotulo ?? titulo}
-        className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-h-[calc(100dvh-56px)] w-full max-w-[430px] animate-sheet-up flex-col overflow-hidden rounded-t-3xl bg-white leading-[normal]"
+        className={`fixed inset-x-0 bottom-0 mx-auto flex max-h-[calc(100dvh-56px)] w-full max-w-[430px] animate-sheet-up flex-col overflow-hidden rounded-t-3xl bg-white leading-[normal] ${topo ? "z-50" : "z-30"}`}
       >
         <div className={`flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 pt-4 ${rodape ? "pb-6" : "pb-[calc(16px+env(safe-area-inset-bottom))]"} ${gap}`}>
           <div className="-mb-4 flex justify-end">
@@ -174,6 +190,29 @@ export function Sheet({ onFechar, titulo, rotulo, rodape, children, gap = "gap-8
         {rodape && <div className="flex-none border-t border-muted/20 bg-white px-4 pt-2 pb-[calc(16px+env(safe-area-inset-bottom))]">{rodape}</div>}
       </div>
     </>
+  );
+}
+
+/** Radio visual (círculo) usado nas listas de opção. */
+export function Radio({ on }: { on: boolean }) {
+  return (
+    <span aria-hidden className={`size-5 shrink-0 rounded-full border border-muted ${on ? "p-[3px]" : ""}`}>
+      {on && <span className="block size-full rounded-full bg-black" />}
+    </span>
+  );
+}
+
+/** Botão laranja de largura total (48px). */
+export function BotaoPrincipal({ children, onClick, disabled }: { children: ReactNode; onClick: () => void; disabled?: boolean }) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="h-12 w-full rounded-lg bg-cta text-base font-semibold text-white disabled:rounded disabled:bg-[#e9e9e9] disabled:font-medium disabled:text-[#696969]"
+    >
+      {children}
+    </button>
   );
 }
 
