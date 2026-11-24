@@ -138,7 +138,7 @@ export default function CartScreen({ itens, metodo, cartaoFinal, alertaN, onMeto
       {sugestoes.length > 0 && (
         <section className="flex flex-col gap-4">
           <h2 className="text-base font-semibold">Compre também</h2>
-          <div className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
+          <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
             {sugestoes.map((p) => (
               <PacoteCard key={p.id} pacote={p} qtd={0} className="w-[175px] flex-none snap-start" {...acoes} />
             ))}
