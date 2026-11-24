@@ -5,6 +5,7 @@ import {
   PACOTES,
   filtrar,
   formatarBRL,
+  linhasItem,
   percentualDesconto,
   precoItem,
   resumo,
@@ -85,6 +86,7 @@ type CardProps = AcoesItem & { pacote: Pacote; qtd: number; onAbrir?: () => void
 export function PacoteCard({ pacote: p, qtd, onComprar, onMais, onMenos, onRemover, onAbrir, className = "" }: CardProps) {
   const un = precoItem(p, 1);
   const nome = p.tag ?? p.linhas[0];
+  const linhas = linhasItem(p, qtd); /* com o item no carrinho, a quantidade de consultas acompanha o contador */
   const abrivel = qtd > 0 && onAbrir;
   return (
     <article
@@ -97,13 +99,13 @@ export function PacoteCard({ pacote: p, qtd, onComprar, onMais, onMenos, onRemov
     >
       {/* Sem tag, a linha fica invisível para manter o alinhamento entre cards (como no Figma) */}
       <div className={`flex items-center justify-between ${p.tag ? "" : "invisible"}`} aria-hidden={!p.tag}>
-        <span className="text-[12px] font-bold whitespace-nowrap text-wine">{p.tag ?? "—"}</span>
+        <span className="text-[10px] font-bold whitespace-nowrap text-wine">{p.tag ?? "—"}</span>
         <Selo pct={percentualDesconto(p)} />
       </div>
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-1 text-xl text-wine">
-          <span>{p.linhas[0]}</span>
-          <span className={p.linhas[1] ? "" : "invisible"} aria-hidden={!p.linhas[1]}>{p.linhas[1] ?? p.linhas[0]}</span>
+          <span>{linhas[0]}</span>
+          <span className={linhas[1] ? "" : "invisible"} aria-hidden={!linhas[1]}>{linhas[1] ?? linhas[0]}</span>
         </div>
         <div className="flex flex-col gap-2 leading-none">
           <s className={`text-xs text-wine/50 ${un.deCentavos > un.porCentavos ? "" : "invisible"}`}>{formatarBRL(un.deCentavos)}</s>
