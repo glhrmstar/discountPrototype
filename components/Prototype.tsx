@@ -27,7 +27,8 @@ const PIX_VALIDADE_MS = 30 * 60 * 1000;
 /**
  * Fluxo: Home → Comprar → "Pra quem deseja comprar?" → Comprar consulta (+ detalhe do pacote)
  * → Revisar carrinho (método, resumo, Compre também) → Processando → Pix (QR) ou direto → Pagamento concluído.
- * Falha no cartão: abra com ?falha=1 para simular a recusa (gaveta "Falha ao processar o pagamento").
+ * Simulações: ?falha=1 recusa o pagamento com cartão ("Cartão recusado");
+ * ?falhaSalvar=1 faz falhar o "Salvar cartão" no Novo cartão ("Falha ao adicionar o cartão"). Dá para usar os dois.
  * Cada avanço mostra um skeleton por ~700 ms (simula a busca de dados). O voltar do celular volta uma tela.
  */
 export default function Prototype() {
@@ -312,9 +313,8 @@ export default function Prototype() {
           )}
           {sheetFalha && (
             <NoticeSheet
-              titulo="Falha ao processar o pagamento"
-              quebra={"Falha ao processar".length}
-              texto="Revise as informações do cartão"
+              titulo="Cartão recusado"
+              texto="Tente novamente ou atualize as informações do cartão."
               onFechar={fecharFalha}
               rodape={<BotaoPrincipal onClick={fecharFalha}>Entendi</BotaoPrincipal>}
             />

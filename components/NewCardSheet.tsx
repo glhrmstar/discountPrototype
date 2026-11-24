@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import InstallmentsDropdown from "@/components/InstallmentsDropdown";
+import NoticeSheet from "@/components/NoticeSheet";
 import { BotaoPrincipal, Sheet } from "@/components/ui";
 import { CARTAO_EXEMPLO, SECOES, formValido, mascarar, ultimos4, type Campo, type FormCartao } from "@/lib/pagamento";
 
@@ -18,6 +19,16 @@ type Props = {
 export default function NewCardSheet({ totalCentavos, parcelas, onParcelas, onFechar, onConfirmar }: Props) {
   const [form, setForm] = useState<FormCartao>(CARTAO_EXEMPLO);
   const [salvar, setSalvar] = useState(false);
+  /** Falha ao salvar o cartão (protótipo: ?falhaSalvar=1). "Entendi" volta ao formulário com os dados. */
+  const [falhaSalvar, setFalhaSalvar] = useState(false);
+  const fecharFalhaSalvar = useCallback(() => setFalhaSalvar(false), []);
+  const confirmar = () => {
+    if (salvar && new URLSearchParams(window.location.search).has("falhaSalvar")) {
+      (document.activeElement as HTMLElement | null)?.blur(); /* fecha o teclado */
+      return setFalhaSalvar(true);
+    }
+    onConfirmar(ultimos4(form.cartao ?? ""), salvar);
+  };
   const ok = formValido(form);
   const primeiro = useRef<HTMLInputElement>(null);
 
@@ -50,7 +61,7 @@ export default function NewCardSheet({ totalCentavos, parcelas, onParcelas, onFe
       <Sheet
         onFechar={onFechar}
         titulo="Novo cartão"
-        rodape={<BotaoPrincipal disabled={!ok} onClick={() => onConfirmar(ultimos4(form.cartao ?? ""), salvar)}>Confirmar</BotaoPrincipal>}
+        rodape={<BotaoPrincipal disabled={!ok} onClick={confirmar}>Confirmar</BotaoPrincipal>}
       >
         {SECOES.map((s, si) => (
           <fieldset key={s.titulo} className="flex flex-col gap-6">
@@ -64,6 +75,15 @@ export default function NewCardSheet({ totalCentavos, parcelas, onParcelas, onFe
           Salvar cartão para compras futuras
         </label>
       </Sheet>
+      {falhaSalvar && (
+        <NoticeSheet
+          topo
+          titulo="Falha ao adicionar o cartão"
+          texto="Revise as informações do cartão e tente novamente."
+          onFechar={fecharFalhaSalvar}
+          rodape={<BotaoPrincipal onClick={fecharFalhaSalvar}>Entendi</BotaoPrincipal>}
+        />
+      )}
     </>
   );
 }
