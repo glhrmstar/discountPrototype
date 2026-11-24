@@ -14,7 +14,8 @@ Protótipo mobile da **nova UX de descontos B2C (compra avulsa)** da Starbem, fe
    - A quantidade de consultas acompanha o contador no carrinho, no detalhe e no card adicionado: Check-up ×2 mostra "2 Clínico geral / 2 Nutri". Consulta individual mostra só o nome com 1 unidade ("Psicologia") e o número a partir de 2 ("2 Psicologias").
 6. **Revisar carrinho**: itens, **Método de pagamento** (radios: Pix, cartão salvo, novo cartão, Apple Pay), **Resumo dos valores** e **Compre também** (carrossel).
    - "Novo cartão de crédito" abre a gaveta **Novo cartão** já com **dados de exemplo** (fictícios, cartão de teste Mastercard) e o foco no primeiro campo, para o teclado do celular subir junto. Os campos têm máscara.
-   - O campo **Parcelas** abre uma gaveta por cima com 1x ou 2x sem juros.
+   - O campo **Parcelas** é um dropdown: a lista com 1x ou 2x sem juros abre logo abaixo do campo.
+   - **Salvar cartão para compras futuras** é opcional e começa desmarcado. Sem marcar, o cartão vale só para esta compra e some depois do pagamento.
    - Com o cartão adicionado, a seção mostra **só ele** (`**** 4444`, bandeira e parcelas) com uma seta. Tocar abre a gaveta **Método de pagamento** para trocar de método ou de parcelas.
    - O checkout tem um botão só, **Confirmar e pagar**, sempre habilitado: sem método escolhido, a lista ganha destaque e a tela rola até ela.
 7. **Processando dados de pagamentos**: loading de ~2 s depois de **Confirmar e pagar**.
@@ -55,7 +56,7 @@ O workflow define `NEXT_PUBLIC_BASE_PATH=/<nome-do-repo>`; se renomear o reposit
 | `components/PersonSheet.tsx` | Tela 2 (bottom sheet) |
 | `components/CatalogScreen.tsx` | Telas 3 e 5 (catálogo, card, barra do carrinho) |
 | `components/PackageSheet.tsx` | Tela 4 (detalhe do pacote) |
-| `components/CartScreen.tsx`, `NewCardSheet.tsx`, `InstallmentsSheet.tsx`, `ChangeMethodSheet.tsx` | Telas 6 a 9 (Revisar carrinho, Novo cartão, Parcelas e Trocar método) |
+| `components/CartScreen.tsx`, `NewCardSheet.tsx`, `InstallmentsDropdown.tsx`, `ChangeMethodSheet.tsx` | Telas 6 a 9 (Revisar carrinho, Novo cartão, dropdown de parcelas e Trocar método) |
 | `components/NoticeSheet.tsx` | Avisos curtos: falha no pagamento e sair do Pix |
 | `components/ProcessingScreen.tsx` | Loading "Processando dados de pagamentos" |
 | `components/PixScreen.tsx` | Pix (QR) |

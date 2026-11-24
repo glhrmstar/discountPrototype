@@ -159,7 +159,7 @@ export function Sheet({ onFechar, titulo, rotulo, rodape, children, gap = "gap-8
     const foco = document.activeElement as HTMLElement | null;
     fechar.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && abertas[abertas.length - 1] === id) aoFechar.current();
+      if (e.key === "Escape" && !e.defaultPrevented && abertas[abertas.length - 1] === id) aoFechar.current();
     };
     window.addEventListener("keydown", onKey);
     return () => {

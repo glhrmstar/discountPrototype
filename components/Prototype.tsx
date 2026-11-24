@@ -40,6 +40,8 @@ export default function Prototype() {
   const [detalhe, setDetalhe] = useState<string | null>(null);
   const [metodo, setMetodo] = useState<MetodoId | null>(null);
   const [cartaoFinal, setCartaoFinal] = useState<string | null>(null);
+  /** "Salvar cartão para compras futuras": sem marcar, o cartão vale só para esta compra. */
+  const [cartaoSalvo, setCartaoSalvo] = useState(false);
   const [parcelas, setParcelas] = useState(1);
   const [pedido, setPedido] = useState<Pedido | null>(null);
   const [sheetCartao, setSheetCartao] = useState(false);
@@ -177,6 +179,7 @@ export default function Prototype() {
   /** Conclui a compra: guarda o pedido para a tela de sucesso e esvazia o carrinho (inclusive o salvo). */
   const concluir = (m: MetodoId) => {
     setPedido({ itens, metodo: m, cartaoFinal, parcelas });
+    if (!cartaoSalvo) setCartaoFinal(null); /* cartão não salvo some depois da compra */
     setItens({});
     apagarCarrinho();
     setMetodo(null);
@@ -284,8 +287,9 @@ export default function Prototype() {
               parcelas={parcelas}
               onParcelas={setParcelas}
               onFechar={fecharCartao}
-              onConfirmar={(final4) => {
+              onConfirmar={(final4, salvar) => {
                 setCartaoFinal(final4);
+                setCartaoSalvo(salvar);
                 setMetodo("cartao");
                 setAlertaN(0);
                 setSheetCartao(false);
