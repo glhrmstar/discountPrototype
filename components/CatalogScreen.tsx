@@ -92,7 +92,7 @@ function PacoteCard({ pacote: p, qtd, onAdicionar, onRemover }: { pacote: Pacote
     <article aria-label={nome} className="flex flex-col gap-6 overflow-hidden rounded-xl bg-cream p-3">
       {/* Sem tag, a linha fica invisível para manter o alinhamento entre cards (como no Figma) */}
       <div className={`flex items-center justify-between ${p.tag ? "" : "invisible"}`} aria-hidden={!p.tag}>
-        <span className="text-[10px] font-bold whitespace-nowrap text-wine">{p.tag ?? "—"}</span>
+        <span className="text-[12px] font-bold whitespace-nowrap text-wine">{p.tag ?? "—"}</span>
         <span className="rounded-full bg-ok px-2 py-1 text-xs font-bold whitespace-nowrap text-white">{off}% OFF</span>
       </div>
       <div className="flex flex-col gap-3">
