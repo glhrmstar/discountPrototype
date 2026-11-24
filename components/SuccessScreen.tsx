@@ -3,7 +3,7 @@ import { iconeMetodo } from "@/components/CartScreen";
 import { BarraInferior } from "@/components/ui";
 import { consultasPorEspecialidade, formatarBRL, resumo, rotuloConsultas, type Itens } from "@/lib/catalogo";
 import { CARTA, montarLeque } from "@/lib/leque";
-import { textoParcela, type MetodoId } from "@/lib/pagamento";
+import { valorParcela, type MetodoId } from "@/lib/pagamento";
 
 /** O que foi pago: guardado no checkout porque o carrinho é esvaziado ao concluir. */
 export type Pedido = { itens: Itens; metodo: MetodoId; cartaoFinal: string | null; parcelas: number };
@@ -53,11 +53,11 @@ export default function SuccessScreen({ pedido, onVoltar, onAgendar }: Props) {
 
       <section {...entra(2)} className="entra flex flex-col gap-4">
         <h2 className="text-base font-semibold">Método de pagamento</h2>
-        {/* Método numa linha só; no cartão, as parcelas ficam à direita em cinza */}
+        {/* Método numa linha só; no cartão, as parcelas ficam à direita em cinza (sem "sem juros" aqui) */}
         <div className="flex h-14 items-center gap-3 rounded-xl border border-[#dcdcdc] px-3">
           <span className="grid size-10 shrink-0 place-items-center">{iconeMetodo(pedido.metodo)}</span>
           <span className="min-w-0 flex-1 truncate text-base">{nomeMetodo}</span>
-          {pedido.metodo === "cartao" && <span className="shrink-0 text-base whitespace-nowrap text-[#808080]">{textoParcela(r.totalPorCentavos, pedido.parcelas, formatarBRL)}</span>}
+          {pedido.metodo === "cartao" && <span className="shrink-0 text-base whitespace-nowrap text-[#808080]">{pedido.parcelas}x de {formatarBRL(valorParcela(r.totalPorCentavos, pedido.parcelas))}</span>}
         </div>
       </section>
 
