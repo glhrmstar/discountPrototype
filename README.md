@@ -9,16 +9,23 @@ Protótipo mobile da **nova UX de descontos B2C (compra avulsa)** da Starbem, fe
 1. **Home**: toque em **Comprar** na barra inferior.
 2. **Pra quem deseja comprar?**: escolha o titular ou um dependente e toque em **Continuar**.
 3. **Comprar consulta**: filtre por Todos / Descontos / Individuais e toque em **Comprar agora**.
-4. **Item adicionado**: use **+** para somar e a lixeira para remover; a barra do carrinho mostra o total.
+4. **Detalhe do pacote** (gaveta): pacotes com desconto mostram o preço com 50% OFF; consultas individuais mostram o **desconto progressivo** (2/4/6/8 consultas → 15/20/25/30%). Use **+**/**−**, a lixeira ou **Limpar**.
+5. **Item adicionado**: tocar no card reabre o detalhe; a barra mostra o total e **Ver carrinho**.
+6. **Revisar carrinho**: itens, **Método de pagamento** (radios), **Resumo dos valores** e **Compre também** (carrossel).
+   - "Novo cartão de crédito" abre a gaveta **Novo cartão** (máscaras nos campos); ao confirmar, o cartão entra na lista como `**** 1234`.
+   - **Continuar** fica sempre habilitado: sem método escolhido, a lista ganha destaque e a tela rola até ela.
+   - Com método escolhido, o botão vira **Confirmar e pagar**.
+7. **Aguardando pagamento (Pix)**: QR ilustrativo, total, contagem regressiva de 30 min e **Copiar código** (fictício).
 
-"Ver carrinho" ainda não tem tela no Figma e mostra um aviso.
+Cada avanço mostra um **skeleton** por ~700 ms, simulando a busca de dados. O voltar do celular volta uma tela.
+A confirmação de pagamento com cartão/Apple Pay ainda não tem tela no Figma e mostra um aviso.
 
 ## Rodar localmente
 
 ```bash
 npm ci
 npm run dev      # http://localhost:3000
-npm test         # regras do carrinho (lib/catalogo.test.ts)
+npm test         # regras de preço, carrinho, máscaras e validação (lib/*.test.ts)
 npm run build    # export estático em out/
 ```
 
@@ -36,15 +43,23 @@ O workflow define `NEXT_PUBLIC_BASE_PATH=/<nome-do-repo>`; se renomear o reposit
 
 | Caminho | O que é |
 |---|---|
-| `components/Prototype.tsx` | Estado do fluxo (tela, pessoa, carrinho, filtro) |
+| `components/Prototype.tsx` | Estado e navegação do fluxo (pilha de telas, carrinho, método, skeletons) |
 | `components/HomeScreen.tsx`, `BottomNav.tsx` | Tela 1 |
 | `components/PersonSheet.tsx` | Tela 2 (bottom sheet) |
-| `components/CatalogScreen.tsx` | Telas 3 e 4 (catálogo, contador e barra do carrinho) |
-| `lib/catalogo.ts` | Pacotes, pessoas e regras do carrinho (valores em centavos) |
+| `components/CatalogScreen.tsx` | Telas 3 e 5 (catálogo, card, barra do carrinho) |
+| `components/PackageSheet.tsx` | Tela 4 (detalhe do pacote) |
+| `components/CartScreen.tsx`, `NewCardSheet.tsx` | Telas 6 a 9 (Revisar carrinho e Novo cartão) |
+| `components/PixScreen.tsx` | Tela 10 (Pix) |
+| `components/Skeletons.tsx` | Skeletons de carregamento |
+| `components/ui.tsx` | Peças compartilhadas: Sheet, Header, Stepper, Progresso, Totais, Selo |
+| `lib/catalogo.ts` | Pacotes, faixas de desconto e regras do carrinho (valores em centavos) |
+| `lib/pagamento.ts` | Campos do cartão, máscaras, validação e utilitários do Pix |
 | `public/assets/` | Ícones e imagens exportados do Figma |
 
 ## Pendências conhecidas
 
-- Preços e percentuais são placeholders do Figma; precisam vir da regra de negócio de descontos B2C.
-- Textos sem acento herdados do Figma ("Clinico", "Endocrino", "Equilibrio") e o erro "desja" no subtítulo da tela 2.
-- Nomes e fotos são fictícios; não use dados reais de pacientes.
+- Preços, percentuais e faixas do desconto progressivo são placeholders do Figma; precisam vir da regra de negócio de descontos B2C (inclusive se a faixa conta por item ou pelo total de individuais).
+- Correções de texto feitas no código e que ainda precisam ir para o Figma: acentos ("Clínico", "Endócrino", "Equilíbrio"), "desja" → "deseja", "Copie e o cole" → "Copie e cole", seções do cartão ("Dados do cartão" / "Endereço de cobrança"), campo "Cidade" e máscara de CPF `000.000.000-00`.
+- O QR do Figma é escaneável e aponta para um site de terceiros; aqui o QR é ilustrativo (não é lido) e o código copiado é fictício.
+- Texto e cor do alerta "Selecione um método de pagamento" (`#D92D20`) não estão no Figma.
+- Nomes e fotos são fictícios; não use dados reais de pacientes. O formulário do cartão não envia nem guarda nada (só os 4 últimos dígitos ficam em memória).
