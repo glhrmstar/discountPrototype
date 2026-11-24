@@ -13,8 +13,7 @@ Protótipo mobile da **nova UX de descontos B2C (compra avulsa)** da Starbem, fe
 5. **Item adicionado**: tocar no card reabre o detalhe; a barra mostra o total e **Ver carrinho**.
 6. **Revisar carrinho**: itens, **Método de pagamento** (radios), **Resumo dos valores** e **Compre também** (carrossel).
    - "Novo cartão de crédito" abre a gaveta **Novo cartão** (máscaras nos campos); ao confirmar, o cartão entra na lista como `**** 1234`.
-   - **Continuar** fica sempre habilitado: sem método escolhido, a lista ganha destaque e a tela rola até ela.
-   - Com método escolhido, o botão vira **Confirmar e pagar**.
+   - O checkout tem um botão só, **Confirmar e pagar**, sempre habilitado: sem método escolhido, a lista ganha destaque e a tela rola até ela.
 7. **Aguardando pagamento (Pix)**: QR ilustrativo, total, contagem regressiva de 30 min e **Copiar código** (fictício).
 
 Cada avanço mostra um **skeleton** por ~700 ms, simulando a busca de dados. O voltar do celular volta uma tela.

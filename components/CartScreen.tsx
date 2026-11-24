@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { PacoteCard, type AcoesItem } from "@/components/CatalogScreen";
-import { BarraInferior, Header, Progresso, Selo, Stepper, Totais } from "@/components/ui";
+import { BarraInferior, Header, Progresso, Selo, Stepper } from "@/components/ui";
 import { asset } from "@/lib/asset";
 import { PACOTES, ehIndividual, formatarBRL, pacotePorId, percentualDesconto, precoItem, resumo, type Itens } from "@/lib/catalogo";
 import type { MetodoId } from "@/lib/pagamento";
@@ -148,11 +148,8 @@ export default function CartScreen({ itens, metodo, cartaoFinal, alertaN, onMeto
 
       {r.quantidade > 0 && (
         <BarraInferior>
-          {metodo ? (
-            <button type="button" onClick={onCheckout} className="h-10 w-full rounded-lg bg-cta text-sm font-semibold text-white">Confirmar e pagar</button>
-          ) : (
-            <Totais itens={itens} acao={<button type="button" onClick={onCheckout} className="h-10 w-[151px] rounded-lg bg-cta text-sm font-semibold text-white">Continuar</button>} />
-          )}
+          {/* Figma 57:5140: checkout com um botão só; sem método, destaca a seção de pagamento */}
+          <button type="button" onClick={onCheckout} className="h-12 w-full rounded-lg bg-cta text-base font-semibold text-white">Confirmar e pagar</button>
         </BarraInferior>
       )}
     </div>
