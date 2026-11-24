@@ -217,10 +217,10 @@ export function BotaoPrincipal({ children, onClick, disabled }: { children: Reac
   );
 }
 
-/** Header da tela, fixo no topo ao rolar. */
+/** Header da tela, fixo no topo ao rolar; a linha embaixo marca onde ele termina. */
 export function Header({ titulo, onVoltar }: { titulo: string; onVoltar?: () => void }) {
   return (
-    <header className="sticky top-0 z-10 -mx-4 -mb-2 flex items-center gap-2 bg-white px-4 pt-[calc(16px+env(safe-area-inset-top))] pb-2">
+    <header className="sticky top-0 z-10 -mx-4 -mb-2 flex items-center gap-2 border-b border-muted/20 bg-white px-4 pt-[calc(16px+env(safe-area-inset-top))] pb-2">
       {onVoltar ? (
         <button type="button" onClick={onVoltar} aria-label="Voltar"><Icon name="voltar" size={40} /></button>
       ) : (
