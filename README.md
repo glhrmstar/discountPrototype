@@ -16,6 +16,8 @@ Protótipo mobile da **nova UX de descontos B2C (compra avulsa)** da Starbem, fe
    - O checkout tem um botão só, **Confirmar e pagar**, sempre habilitado: sem método escolhido, a lista ganha destaque e a tela rola até ela.
 7. **Aguardando pagamento (Pix)**: QR ilustrativo, total, contagem regressiva de 30 min e **Copiar código** (fictício).
 
+O **carrinho fica salvo**: sair do fluxo de compra (ou fechar a página) não o esvazia. Na Home, o "Comprar" mostra quantos itens estão salvos, e ao voltar o catálogo já abre com eles. Fica no `localStorage` do navegador por 7 dias, só com pacotes, quantidades e a pessoa escolhida.
+
 Cada avanço mostra um **skeleton** por ~700 ms, simulando a busca de dados. O voltar do celular volta uma tela.
 A confirmação de pagamento com cartão/Apple Pay ainda não tem tela no Figma e mostra um aviso.
 
@@ -52,6 +54,7 @@ O workflow define `NEXT_PUBLIC_BASE_PATH=/<nome-do-repo>`; se renomear o reposit
 | `components/Skeletons.tsx` | Skeletons de carregamento |
 | `components/ui.tsx` | Peças compartilhadas: Sheet, Header, Stepper, Progresso, Totais, Selo |
 | `lib/catalogo.ts` | Pacotes, faixas de desconto e regras do carrinho (valores em centavos) |
+| `lib/carrinhoSalvo.ts` | Salvar/ler o carrinho no navegador (validação e validade de 7 dias) |
 | `lib/pagamento.ts` | Campos do cartão, máscaras, validação e utilitários do Pix |
 | `public/assets/` | Ícones e imagens exportados do Figma |
 
@@ -61,4 +64,5 @@ O workflow define `NEXT_PUBLIC_BASE_PATH=/<nome-do-repo>`; se renomear o reposit
 - Correções de texto feitas no código e que ainda precisam ir para o Figma: acentos ("Clínico", "Endócrino", "Equilíbrio"), "desja" → "deseja", "Copie e o cole" → "Copie e cole", seções do cartão ("Dados do cartão" / "Endereço de cobrança"), campo "Cidade" e máscara de CPF `000.000.000-00`.
 - O QR do Figma é escaneável e aponta para um site de terceiros; aqui o QR é ilustrativo (não é lido) e o código copiado é fictício.
 - Texto e cor do alerta "Selecione um método de pagamento" (`#D92D20`) não estão no Figma.
+- Carrinho salvo no `localStorage` só serve ao protótipo: em produção o carrinho (dado de saúde, LGPD) deve ficar no backend, por conta, e não no aparelho.
 - Nomes e fotos são fictícios; não use dados reais de pacientes. O formulário do cartão não envia nem guarda nada (só os 4 últimos dígitos ficam em memória).

@@ -11,6 +11,7 @@ import PersonSheet from "@/components/PersonSheet";
 import PixScreen from "@/components/PixScreen";
 import Skeleton from "@/components/Skeletons";
 import { PESSOAS, adicionar, diminuir, pacotePorId, remover, resumo, type Filtro, type Itens } from "@/lib/catalogo";
+import { lerCarrinho, salvarCarrinho } from "@/lib/carrinhoSalvo";
 import { PIX_FICTICIO, prepararTeclado, type MetodoId } from "@/lib/pagamento";
 
 type Tela = "home" | "catalogo" | "carrinho" | "pix";
@@ -41,12 +42,27 @@ export default function Prototype() {
   const timerCarga = useRef<ReturnType<typeof setTimeout>>(undefined);
   /** Pilha própria de telas: o roteador do Next reescreve history.state, então não dá para depender dele. */
   const pilha = useRef<Tela[]>(["home"]);
+  /** Só grava depois de ler o carrinho salvo, para não sobrescrevê-lo com o estado inicial vazio. */
+  const [salvoLido, setSalvoLido] = useState(false);
 
   const carregar = useCallback(() => {
     setCarregando(true);
     clearTimeout(timerCarga.current);
     timerCarga.current = setTimeout(() => setCarregando(false), CARREGAMENTO_MS);
   }, []);
+
+  /* Carrinho salvo: restaura ao abrir (depois da hidratação) e grava a cada mudança */
+  useEffect(() => {
+    const salvo = lerCarrinho();
+    if (salvo) {
+      setItens(salvo.itens);
+      setPessoa(salvo.pessoa);
+    }
+    setSalvoLido(true);
+  }, []);
+  useEffect(() => {
+    if (salvoLido) salvarCarrinho({ itens, pessoa });
+  }, [salvoLido, itens, pessoa]);
 
   useEffect(() => {
     carregar();
@@ -127,7 +143,7 @@ export default function Prototype() {
       ) : tela === "home" ? (
         <>
           <HomeScreen />
-          <BottomNav onComprar={() => setSheetPessoa(true)} />
+          <BottomNav onComprar={() => setSheetPessoa(true)} itensNoCarrinho={resumo(itens).quantidade} />
           {sheetPessoa && (
             <PersonSheet
               selecionada={pessoa}
@@ -135,7 +151,7 @@ export default function Prototype() {
               onFechar={fecharPessoa}
               onContinuar={() => {
                 setSheetPessoa(false);
-                setItens({});
+                /* mantém o carrinho: sair e voltar ao fluxo de compra não o esvazia */
                 setFiltro("todos");
                 setMetodo(null);
                 setAlertaN(0);
