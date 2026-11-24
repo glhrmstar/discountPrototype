@@ -130,7 +130,8 @@ export function BotaoVerCarrinho({ onClick }: { onClick: () => void }) {
 
 type SheetProps = {
   onFechar: () => void;
-  titulo?: string;
+  titulo?: ReactNode;
+  /** Nome acessível da gaveta; obrigatório quando o título não é texto simples. */
   rotulo?: string;
   rodape?: ReactNode;
   children: ReactNode;
@@ -175,7 +176,7 @@ export function Sheet({ onFechar, titulo, rotulo, rodape, children, gap = "gap-8
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={rotulo ?? titulo}
+        aria-label={rotulo ?? (typeof titulo === "string" ? titulo : undefined)}
         className={`fixed inset-x-0 bottom-0 mx-auto flex max-h-[calc(100dvh-56px)] w-full max-w-[430px] animate-sheet-up flex-col overflow-hidden rounded-t-3xl bg-white leading-[normal] ${topo ? "z-50" : "z-30"}`}
       >
         <div className={`flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 pt-4 ${rodape ? "pb-6" : "pb-[calc(16px+env(safe-area-inset-bottom))]"} ${gap}`}>

@@ -13,11 +13,13 @@ Protótipo mobile da **nova UX de descontos B2C (compra avulsa)** da Starbem, fe
 5. **Item adicionado**: tocar no card reabre o detalhe; a barra mostra o total e **Ver carrinho**.
 6. **Revisar carrinho**: itens, **Método de pagamento** (radios: Pix, cartão salvo, novo cartão, Apple Pay), **Resumo dos valores** e **Compre também** (carrossel).
    - "Novo cartão de crédito" abre a gaveta **Novo cartão** já com **dados de exemplo** (fictícios, cartão de teste Mastercard) e o foco no primeiro campo, para o teclado do celular subir junto. Os campos têm máscara.
-   - O campo **Parcelas** abre uma gaveta por cima com 1x ou 2x sem juros. Ao confirmar, o cartão entra na lista como `**** 4444` com a bandeira e as parcelas.
+   - O campo **Parcelas** abre uma gaveta por cima com 1x ou 2x sem juros.
+   - Com o cartão adicionado, a seção mostra **só ele** (`**** 4444`, bandeira e parcelas) com uma seta. Tocar abre a gaveta **Método de pagamento** para trocar de método ou de parcelas.
    - O checkout tem um botão só, **Confirmar e pagar**, sempre habilitado: sem método escolhido, a lista ganha destaque e a tela rola até ela.
 7. **Processando dados de pagamentos**: loading de ~2 s depois de **Confirmar e pagar**.
-8. **Aguardando pagamento (Pix)**: QR ilustrativo, total, contagem regressiva de 30 min e **Copiar código** (fictício). Tocar no QR simula a confirmação do pagamento.
-9. **Pagamento concluído**: consultas compradas por especialidade, método usado e resumo dos valores. Cartão e Apple Pay chegam aqui direto depois do loading. O carrinho é esvaziado; **Voltar** leva à Home e **Agendar consulta** mostra um aviso (tela ainda não desenhada).
+   - **Falha no cartão**: abra o protótipo com `?falha=1` para simular a recusa. Depois do loading aparece a gaveta **Falha ao processar o pagamento**; **Entendi** volta ao carrinho, que continua igual.
+8. **Aguardando pagamento (Pix)**: QR ilustrativo, total, contagem regressiva de 30 min e **Copiar código** (fictício). Tocar no QR simula a confirmação do pagamento. Sair (seta ou voltar do navegador) pede confirmação: **Sair** volta ao carrinho e **Continuar** mantém o QR.
+9. **Pagamento concluído**: uma carta por consulta comprada (até 6) abrindo em leque, e os blocos entram um depois do outro. Depois, consultas compradas por especialidade, método usado e resumo dos valores. Cartão e Apple Pay chegam aqui direto depois do loading. O carrinho é esvaziado; **Voltar** leva à Home e **Agendar consulta** mostra um aviso (tela ainda não desenhada).
 
 O **carrinho fica salvo**: sair do fluxo de compra (ou fechar a página) não o esvazia. Na Home, o "Comprar" mostra quantos itens estão salvos, e ao voltar o catálogo já abre com eles. Fica no `localStorage` do navegador por 7 dias, só com pacotes, quantidades e a pessoa escolhida.
 
@@ -52,7 +54,8 @@ O workflow define `NEXT_PUBLIC_BASE_PATH=/<nome-do-repo>`; se renomear o reposit
 | `components/PersonSheet.tsx` | Tela 2 (bottom sheet) |
 | `components/CatalogScreen.tsx` | Telas 3 e 5 (catálogo, card, barra do carrinho) |
 | `components/PackageSheet.tsx` | Tela 4 (detalhe do pacote) |
-| `components/CartScreen.tsx`, `NewCardSheet.tsx`, `InstallmentsSheet.tsx` | Telas 6 a 9 (Revisar carrinho, Novo cartão e Parcelas) |
+| `components/CartScreen.tsx`, `NewCardSheet.tsx`, `InstallmentsSheet.tsx`, `ChangeMethodSheet.tsx` | Telas 6 a 9 (Revisar carrinho, Novo cartão, Parcelas e Trocar método) |
+| `components/NoticeSheet.tsx` | Avisos curtos: falha no pagamento e sair do Pix |
 | `components/ProcessingScreen.tsx` | Loading "Processando dados de pagamentos" |
 | `components/PixScreen.tsx` | Pix (QR) |
 | `components/SuccessScreen.tsx` | Pagamento concluído |
@@ -60,6 +63,7 @@ O workflow define `NEXT_PUBLIC_BASE_PATH=/<nome-do-repo>`; se renomear o reposit
 | `components/ui.tsx` | Peças compartilhadas: Sheet, Header, Stepper, Progresso, Totais, Selo |
 | `lib/catalogo.ts` | Pacotes, faixas de desconto e regras do carrinho (valores em centavos) |
 | `lib/carrinhoSalvo.ts` | Salvar/ler o carrinho no navegador (validação e validade de 7 dias) |
+| `lib/leque.ts` | Ângulos e tempos do leque de cartas da tela de sucesso |
 | `lib/pagamento.ts` | Campos do cartão, máscaras, validação, parcelas e utilitários do Pix |
 | `public/assets/` | Ícones e imagens exportados do Figma |
 

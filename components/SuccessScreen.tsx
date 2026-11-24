@@ -1,6 +1,8 @@
+import type { CSSProperties } from "react";
 import { iconeMetodo } from "@/components/CartScreen";
 import { BarraInferior } from "@/components/ui";
 import { consultasPorEspecialidade, formatarBRL, resumo, rotuloConsultas, type Itens } from "@/lib/catalogo";
+import { CARTA, montarLeque } from "@/lib/leque";
 import { textoParcela, type MetodoId } from "@/lib/pagamento";
 
 /** O que foi pago: guardado no checkout porque o carrinho é esvaziado ao concluir. */
@@ -16,29 +18,37 @@ export default function SuccessScreen({ pedido, onVoltar, onAgendar }: Props) {
   const consultas = consultasPorEspecialidade(pedido.itens);
   const nomeMetodo = pedido.metodo === "cartao" && pedido.cartaoFinal ? `**** ${pedido.cartaoFinal}` : NOME_METODO[pedido.metodo];
   const linha = "flex h-12 items-center justify-between gap-3 px-3";
+  const leque = montarLeque(consultas.reduce((t, [, n]) => t + n, 0));
+  /* entrada gradual: cada bloco entra depois do anterior, quando o leque termina de abrir */
+  const entra = (ordem: number) => ({ style: { "--ordem": ordem, "--depois": `${leque.textoAposMs}ms` } as CSSProperties });
 
   return (
     <div className="flex flex-col gap-8 px-4 pt-[calc(48px+env(safe-area-inset-top))] pb-[calc(120px+env(safe-area-inset-bottom))] leading-[normal]">
       <div className="flex flex-col gap-3">
-        {/* Ilustração do Figma: dois cartões inclinados (formas, sem imagem) */}
-        <div className="relative h-[92px]" aria-hidden>
-          <span className="absolute top-[7.4px] left-[calc(50%-21.47px)] h-[79.471px] w-[50.192px] -translate-x-1/2 -rotate-15 rounded-xl bg-[linear-gradient(145.98deg,#fff5e7_33.39%,#ffc992_150.93%)]" />
-          <span className="absolute top-[7.4px] left-[calc(50%+21.4px)] h-[79.471px] w-[50.192px] -translate-x-1/2 rotate-15 rounded-xl bg-[linear-gradient(145.98deg,#fff5e7_33.39%,#ffc992_150.93%)]" />
+        {/* Uma carta por consulta comprada (até 6), em leque. Formas do Figma, sem imagem */}
+        <div className="relative" style={{ height: leque.alturaPx }} aria-hidden>
+          {leque.cartas.map((c, i) => (
+            <span
+              key={i}
+              className="leque-carta absolute rounded-xl bg-[linear-gradient(145.98deg,#fff5e7_33.39%,#ffc992_150.93%)] shadow-[0_1px_4px_rgba(255,140,60,.16)]"
+              style={{ top: CARTA.topo, left: `calc(50% - ${CARTA.largura / 2}px)`, width: CARTA.largura, height: CARTA.altura, "--a": `${c.anguloGraus}deg`, "--d": `${c.atrasoMs}ms` } as CSSProperties}
+            />
+          ))}
         </div>
-        <h1 role="status" className="text-center text-2xl leading-[1.2] font-semibold">
+        <h1 role="status" {...entra(0)} className="entra text-center text-2xl leading-[1.2] font-semibold">
           Pagamento concluído
           <br />
           com sucesso
         </h1>
       </div>
 
-      <ul aria-label="Consultas compradas" className="flex flex-col divide-y divide-[#dcdcdc] overflow-hidden rounded-xl border border-[#dcdcdc] text-base">
+      <ul aria-label="Consultas compradas" {...entra(1)} className="entra flex flex-col divide-y divide-[#dcdcdc] overflow-hidden rounded-xl border border-[#dcdcdc] text-base">
         {consultas.map(([nome, n]) => (
           <li key={nome} className={linha}><span className="min-w-0 flex-1">{nome}</span><span className="whitespace-nowrap">{rotuloConsultas(n)}</span></li>
         ))}
       </ul>
 
-      <section className="flex flex-col gap-4">
+      <section {...entra(2)} className="entra flex flex-col gap-4">
         <h2 className="text-base font-semibold">Método de pagamento</h2>
         <div className="flex min-h-14 items-center gap-3 rounded-xl border border-[#dcdcdc] px-3 py-1.5">
           <span className="grid size-10 shrink-0 place-items-center">{iconeMetodo(pedido.metodo)}</span>
@@ -49,7 +59,7 @@ export default function SuccessScreen({ pedido, onVoltar, onAgendar }: Props) {
         </div>
       </section>
 
-      <section className="flex flex-col gap-4">
+      <section {...entra(3)} className="entra flex flex-col gap-4">
         <h2 className="text-base font-semibold">Resumo dos valores</h2>
         <dl className="flex flex-col overflow-hidden rounded-xl border border-[#dcdcdc] text-base">
           <div className={linha}><dt>Subtotal</dt><dd>{formatarBRL(r.totalDeCentavos)}</dd></div>
@@ -61,7 +71,7 @@ export default function SuccessScreen({ pedido, onVoltar, onAgendar }: Props) {
       </section>
 
       <BarraInferior>
-        <div className="flex gap-6">
+        <div {...entra(4)} className="entra flex gap-6">
           <button type="button" onClick={onVoltar} className="h-12 flex-1 rounded-lg border border-muted bg-white text-base font-medium">Voltar</button>
           <button type="button" onClick={onAgendar} className="h-12 flex-1 rounded-lg bg-cta text-base font-semibold text-white">Agendar consulta</button>
         </div>
