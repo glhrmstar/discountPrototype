@@ -75,9 +75,10 @@ export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alert
           return (
             /* Item em lista (sem card): miniatura laranja (avulsa) ou roxa (pacote), tipo + desconto, consultas e preços */
             <article key={id} aria-label={nome} className="flex flex-col gap-4 border-b border-[#dcdcdc] pb-6 [&+&]:mt-2">
-              <div className="flex items-center gap-3">
-                <span aria-hidden className={`h-[74px] w-[42px] shrink-0 rounded-xl border ${p.tag ? "border-[#e2d1fa]" : "border-[#fde3c2]"}`} style={{ background: degrade(!!p.tag, 145.98) }} />
-                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+              {/* tipo no topo da miniatura; consultas e preço centralizados no espaço abaixo dele */}
+              <div className="flex items-stretch gap-3">
+                <span aria-hidden className={`h-[74px] w-[42px] shrink-0 self-start rounded-xl border ${p.tag ? "border-[#e2d1fa]" : "border-[#fde3c2]"}`} style={{ background: degrade(!!p.tag, 145.98) }} />
+                <div className="flex min-h-[74px] min-w-0 flex-1 flex-col gap-1.5">
                   <p className="flex items-center gap-1.5 text-sm leading-[18px] whitespace-nowrap text-muted uppercase">
                     {rotuloTipo(p)}
                     {pct > 0 && (
@@ -88,7 +89,7 @@ export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alert
                     )}
                   </p>
                   {/* consultas (1 ou 2) centralizadas na altura dos preços */}
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-1 items-center justify-between gap-3">
                     <div className="flex min-w-0 flex-col gap-1 text-base leading-[1.4]">
                       {p.linhas.map((l) => <span key={l}>{l}</span>)}
                     </div>
