@@ -118,7 +118,7 @@ export function PacoteCard({ pacote: p, qtd, onComprar, onMais, onMenos, onRemov
           )}
         </div>
       </div>
-      <div className="flex flex-col gap-2 px-3 leading-none">
+      <div className="flex flex-col gap-1 px-3 leading-none">
         <s className={`text-xs leading-none text-[#808080] ${un.deCentavos > un.porCentavos ? "" : "invisible"}`}>{formatarBRL(un.deCentavos)}</s>
         <span className="text-base leading-none font-semibold text-black">{formatarBRL(un.porCentavos)}</span>
       </div>
