@@ -72,7 +72,7 @@ export default function PersonSheet({ selecionada, onSelecionar, onFechar, onCon
           })}
         </div>
 
-        <button type="button" onClick={onContinuar} className="flex h-12 items-center justify-center rounded-lg bg-amber px-4 font-semibold text-white">
+        <button type="button" onClick={onContinuar} className="flex h-12 items-center justify-center rounded-lg bg-cta px-4 font-semibold text-white">
           Continuar
         </button>
       </div>

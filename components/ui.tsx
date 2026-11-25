@@ -114,7 +114,7 @@ export function Totais({ itens, acao }: { itens: Itens; acao: ReactNode }) {
 /** Barra fixa no rodapé da tela, acima da área segura do iPhone. */
 export function BarraInferior({ children }: { children: ReactNode }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-10 mx-auto flex min-h-[calc(82px+env(safe-area-inset-bottom))] w-full max-w-[430px] flex-col justify-center border-t border-muted/20 bg-white/90 px-4 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))] backdrop-blur-[5px]">
+    <div className="fixed inset-x-0 bottom-0 z-10 mx-auto flex min-h-[calc(82px+env(safe-area-inset-bottom))] w-full max-w-[430px] flex-col justify-center border-t border-divisoria/20 bg-white/90 px-4 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))] backdrop-blur-[5px]">
       {children}
     </div>
   );
@@ -188,7 +188,7 @@ export function Sheet({ onFechar, titulo, rotulo, rodape, children, gap = "gap-8
           {titulo && <h2 className="text-2xl font-semibold">{titulo}</h2>}
           {children}
         </div>
-        {rodape && <div className="flex-none border-t border-muted/20 bg-white px-4 pt-2 pb-[calc(16px+env(safe-area-inset-bottom))]">{rodape}</div>}
+        {rodape && <div className="flex-none border-t border-divisoria/20 bg-white px-4 pt-2 pb-[calc(16px+env(safe-area-inset-bottom))]">{rodape}</div>}
       </div>
     </>
   );
@@ -220,7 +220,7 @@ export function BotaoPrincipal({ children, onClick, disabled }: { children: Reac
 /** Header da tela, fixo no topo ao rolar; a linha embaixo marca onde ele termina. */
 export function Header({ titulo, onVoltar }: { titulo: string; onVoltar?: () => void }) {
   return (
-    <header className="sticky top-0 z-10 -mx-4 -mb-2 flex items-center gap-2 border-b border-muted/20 bg-white px-4 pt-[calc(16px+env(safe-area-inset-top))] pb-2">
+    <header className="sticky top-0 z-10 -mx-4 -mb-2 flex items-center gap-2 border-b border-divisoria/20 bg-white px-4 pt-[calc(16px+env(safe-area-inset-top))] pb-2">
       {onVoltar ? (
         <button type="button" onClick={onVoltar} aria-label="Voltar"><Icon name="voltar" size={40} /></button>
       ) : (

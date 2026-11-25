@@ -42,7 +42,7 @@ export default function NewCardSheet({ totalCentavos, parcelas, onParcelas, onFe
 
   const campo = (c: Campo) => (
     <label key={c.id} className={`flex h-14 min-w-0 flex-col justify-center rounded-2xl border border-[#b6b6b6] bg-[#f7f7f7] px-4 py-2 shadow-[0_1px_2px_rgba(12,17,29,0.1)] focus-within:border-cta ${c.largo ? "flex-[0_0_calc(100%-92px)]" : "flex-1"}`}>
-      <span className="text-xs leading-4 whitespace-nowrap text-[#9c9c9c]">{c.rotulo}</span>
+      <span className="text-xs leading-4 whitespace-nowrap text-muted">{c.rotulo}</span>
       <input
         ref={c.id === "nome" ? primeiro : undefined}
         name={c.id}
@@ -51,7 +51,7 @@ export default function NewCardSheet({ totalCentavos, parcelas, onParcelas, onFe
         inputMode={c.inputMode}
         autoComplete={c.autoComplete}
         onChange={(e) => setForm((f) => ({ ...f, [c.id]: mascarar(c.id, e.target.value) }))}
-        className="w-full min-w-0 bg-transparent text-base leading-6 outline-none placeholder:text-[#808080]"
+        className="w-full min-w-0 bg-transparent text-base leading-6 outline-none placeholder:text-muted"
       />
     </label>
   );

@@ -5,8 +5,11 @@
 @theme {
   --font-sans: "Funnel Display Variable", ui-sans-serif, system-ui, sans-serif;
   --color-surface: #f2f3f6;
-  --color-muted: #96a1b5;
-  --color-placeholder: #787887;
+  /* Cinza de texto único em todo o app: #696969 (5,5:1 no branco; passa AA). */
+  --color-muted: #696969;
+  /* Divisórias claras (só com opacidade, ex.: border-divisoria/20); não usar para texto. */
+  --color-divisoria: #96a1b5;
+  --color-placeholder: #696969;
   --color-amber: #ffa326;
   --color-cta: #ff5100;
   --color-wine: #900700;
