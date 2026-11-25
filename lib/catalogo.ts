@@ -4,11 +4,12 @@
  * Valores sempre em centavos para não acumular erro de ponto flutuante.
  */
 
-export type Filtro = "todos" | "descontos" | "individuais";
+/** Sem filtro (null) mostra tudo; tocar de novo no chip ativo desliga o filtro. */
+export type Filtro = "descontos" | "avulsas" | "pacotes";
 
 export type Pacote = {
   id: string;
-  /** Nome da campanha. Pacotes com tag têm desconto fixo; sem tag são consultas individuais. */
+  /** Rótulo do pacote ("PACOTE" ou nome próprio, como "Check-up"). Com tag: desconto fixo; sem tag: consulta avulsa. */
   tag?: string;
   /**
    * Consultas incluídas em 1 unidade, uma por linha (o card reserva sempre duas linhas).
@@ -33,17 +34,32 @@ export const PESSOAS: readonly Pessoa[] = [
   { id: "dep-3", nome: "Antonio Oliveira", tipo: "Dependente" },
 ];
 
+/**
+ * Ordem da vitrine pelo volume de vendas: 1º a avulsa mais vendida (Nutricionista), 2º o pacote mais vendido
+ * (2 Psicologias), depois o resto intercalado. Preços da tabela atual de avulsas e pacotes.
+ * A validar: o preço "de" dos pacotes precisa ser um preço de referência real (CDC); hoje ele não bate com a soma das avulsas.
+ */
 export const PACOTES: readonly Pacote[] = [
-  { id: "terapia-em-dia", tag: "Terapia em dia", linhas: ["2 Psicologias"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
-  { id: "check-up", tag: "Check-up", linhas: ["1 Clínico geral", "1 Nutri"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
-  { id: "equilibrio", tag: "Equilíbrio", linhas: ["1 Endócrino", "1 Nutri"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
-  { id: "mental", tag: "Mental", linhas: ["1 Psiquiatria", "2 Psicologias"], precoDeCentavos: 10000, precoPorCentavos: 5000 },
+  { id: "nutricionista", linhas: ["Nutricionista"], precoDeCentavos: 5990, precoPorCentavos: 5990 },
+  { id: "terapia-em-dia", tag: "PACOTE", linhas: ["2 Psicologias"], precoDeCentavos: 19980, precoPorCentavos: 9990 },
+  { id: "psiquiatria", linhas: ["Psiquiatria"], precoDeCentavos: 18890, precoPorCentavos: 18890 },
   { id: "psicologia", linhas: ["Psicologia"], precoDeCentavos: 4990, precoPorCentavos: 4990 },
-  { id: "especialista", linhas: ["Especialista"], precoDeCentavos: 4990, precoPorCentavos: 4990 },
+  { id: "clinico-geral", linhas: ["Clínico geral"], precoDeCentavos: 4990, precoPorCentavos: 4990 },
+  { id: "especialista", linhas: ["Especialista"], precoDeCentavos: 11997, precoPorCentavos: 11997 },
+  { id: "mental", tag: "PACOTE", linhas: ["1 Psiquiatria", "2 Psicologias"], precoDeCentavos: 40967, precoPorCentavos: 24990 },
+  { id: "equilibrio", tag: "PACOTE", linhas: ["1 Endócrino", "1 Nutri"], precoDeCentavos: 21039, precoPorCentavos: 15990 },
+  { id: "check-up", tag: "Check-up", linhas: ["1 Clínico geral", "1 Nutri"], precoDeCentavos: 16980, precoPorCentavos: 8490 },
 ];
 
 export const pacotePorId = (id: string) => PACOTES.find((p) => p.id === id);
 export const ehIndividual = (p: Pacote) => !p.tag;
+/** Nome acessível do item: vários pacotes têm a mesma tag ("PACOTE"), então o nome lista as consultas. */
+export const nomeItem = (p: Pacote) => (p.tag ? `Pacote ${p.linhas.join(" e ")}` : p.linhas[0]);
+/** Rótulo de tipo mostrado nos cards e no carrinho. */
+export const rotuloTipo = (p: Pacote) => p.tag ?? "AVULSO";
+/** A compra tem algum pacote? Define a versão roxa da tela de conclusão. */
+export const temPacote = (itens: Itens, pacotes: readonly Pacote[] = PACOTES) =>
+  Object.entries(itens).some(([id, qtd]) => qtd > 0 && !!pacotes.find((p) => p.id === id)?.tag);
 
 /** Desconto progressivo das consultas individuais: [consultas, % de desconto]. Contado por item. */
 export const FAIXAS: readonly (readonly [number, number])[] = [
@@ -77,10 +93,11 @@ export function precoItem(p: Pacote, qtd: number): { deCentavos: number; porCent
   return { deCentavos: de, porCentavos: p.precoPorCentavos * qtd };
 }
 
-/** "Descontos" = pacotes de campanha (com tag); "Individuais" = os demais. */
-export function filtrar(pacotes: readonly Pacote[], filtro: Filtro): Pacote[] {
-  if (filtro === "descontos") return pacotes.filter((p) => p.tag);
-  if (filtro === "individuais") return pacotes.filter((p) => !p.tag);
+/** "Descontos" = itens com preço riscado na vitrine; "Avulsas" = sem tag; "Pacotes" = com tag; null = todos. */
+export function filtrar(pacotes: readonly Pacote[], filtro: Filtro | null): Pacote[] {
+  if (filtro === "descontos") return pacotes.filter((p) => { const v = precoItem(p, 1); return v.deCentavos > v.porCentavos; });
+  if (filtro === "avulsas") return pacotes.filter((p) => !p.tag);
+  if (filtro === "pacotes") return pacotes.filter((p) => p.tag);
   return [...pacotes];
 }
 
@@ -99,7 +116,7 @@ export function diminuir(itens: Itens, id: string): Itens {
   return { ...itens, [id]: atual - 1 };
 }
 
-/** Remove o pacote inteiro do carrinho (lixeira e "Limpar"). */
+/** Remove o pacote inteiro do carrinho (lixeira, "Limpar" e "Remover"). */
 export function remover(itens: Itens, id: string): Itens {
   if (!(id in itens)) return itens;
   const { [id]: _removido, ...resto } = itens;

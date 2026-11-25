@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { PacoteCard, type AcoesItem } from "@/components/CatalogScreen";
-import { BarraInferior, Header, Progresso, Radio, Selo, Stepper } from "@/components/ui";
+import { PacoteCard, degrade, type AcoesItem } from "@/components/CatalogScreen";
+import { BarraInferior, Header, Progresso, Radio, Stepper } from "@/components/ui";
 import { asset } from "@/lib/asset";
-import { PACOTES, ehIndividual, formatarBRL, pacotePorId, percentualDesconto, precoItem, resumo, type Itens } from "@/lib/catalogo";
-import { PARCELAS_MAX, textoParcela, type MetodoId } from "@/lib/pagamento";
+import { PACOTES, ehIndividual, formatarBRL, pacotePorId, percentualDesconto, precoItem, resumo, nomeItem, rotuloTipo, type Itens } from "@/lib/catalogo";
+import { PARCELAS_MAX, textoParcela, valorParcela, type MetodoId } from "@/lib/pagamento";
 
 export type OpcaoMetodo = MetodoId | "novo";
 
@@ -71,27 +71,37 @@ export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alert
           const qtd = itens[id];
           const v = precoItem(p, qtd);
           const pct = percentualDesconto(p, qtd);
-          const nome = p.tag ?? p.linhas[0];
+          const nome = nomeItem(p);
           return (
-            <article key={id} aria-label={nome} className="flex flex-col gap-4 overflow-hidden rounded-xl border border-[#dcdcdc] p-3">
-              {(p.tag || pct > 0) && (
-                <div className={`flex items-center ${p.tag ? "justify-between" : "justify-end"}`}>
-                  {p.tag && <span className="text-sm font-bold whitespace-nowrap">{p.tag}</span>}
-                  <Selo pct={pct} />
-                </div>
-              )}
-              <div className="flex items-center gap-3">
-                <div className="flex min-h-[54px] min-w-0 flex-1 flex-col justify-center gap-1 text-xl">
-                  {p.linhas.map((l) => <span key={l}>{l}</span>)}
-                </div>
-                <div className="flex flex-col gap-2 text-right leading-none whitespace-nowrap">
-                  <s className={`text-xs text-black/50 ${v.deCentavos > v.porCentavos ? "" : "invisible"}`}>{formatarBRL(v.deCentavos)}</s>
-                  <span className="text-base font-semibold">{formatarBRL(v.porCentavos)}</span>
+            /* Item em lista (sem card): miniatura laranja (avulsa) ou roxa (pacote), tipo + desconto, consultas e preços */
+            <article key={id} aria-label={nome} className="flex flex-col gap-4 border-b border-[#dcdcdc] pb-6 [&+&]:mt-2">
+              <div className="flex items-start gap-3">
+                <span aria-hidden className={`h-[74px] w-[42px] shrink-0 rounded-xl border ${p.tag ? "border-[#e2d1fa]" : "border-[#fde3c2]"}`} style={{ background: degrade(!!p.tag, 145.98) }} />
+                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                  <p className="flex items-center gap-1.5 text-xs leading-4 whitespace-nowrap text-[#8e97a8] uppercase">
+                    {rotuloTipo(p)}
+                    {pct > 0 && (
+                      <>
+                        <span aria-hidden className="size-1 rounded-full bg-[#d3d7df]" />
+                        <b className="font-semibold text-ok">{pct}% OFF</b>
+                      </>
+                    )}
+                  </p>
+                  {/* consultas (1 ou 2) centralizadas na altura dos preços */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 flex-col gap-1 text-base leading-[1.4]">
+                      {p.linhas.map((l) => <span key={l}>{l}</span>)}
+                    </div>
+                    <div className="flex flex-col gap-2 text-right leading-none whitespace-nowrap">
+                      {v.deCentavos > v.porCentavos && <s className="text-sm text-black/50">{formatarBRL(v.deCentavos)}</s>}
+                      <span className="text-base font-semibold">{formatarBRL(v.porCentavos)}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
               {ehIndividual(p) && <Progresso qtd={qtd} pequeno />}
               <div className="flex items-center justify-between">
-                <button type="button" onClick={() => acoes.onRemover(id)} className="text-base font-semibold underline">Limpar</button>
+                <button type="button" onClick={() => acoes.onRemover(id)} className="text-sm font-semibold underline">Remover</button>
                 <Stepper laranja qtd={qtd} nome={nome} onMais={() => acoes.onMais(id)} onMenos={() => acoes.onMenos(id)} onRemover={() => acoes.onRemover(id)} className="w-[138px] border border-[#dcdcdc]" />
               </div>
             </article>
@@ -112,10 +122,9 @@ export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alert
                 className="flex min-h-14 items-center gap-3 rounded-xl border border-[#dcdcdc] px-3 py-1.5 text-left"
               >
                 <span className="grid size-10 shrink-0 place-items-center">{iconeMetodo("cartao")}</span>
-                <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="text-base">**** {cartaoFinal}</span>
-                  <span className="text-sm text-[#808080]">{textoParcela(r.totalPorCentavos, parcelas, formatarBRL)}</span>
-                </span>
+                <span className="min-w-0 flex-1 text-base whitespace-nowrap">**** {cartaoFinal}</span>
+                {/* parcelas à direita, junto da seta; sem "sem juros" para caber em uma linha (como na conclusão) */}
+                <span className="-mr-1 shrink-0 text-base whitespace-nowrap text-[#808080]">{parcelas}x de {formatarBRL(valorParcela(r.totalPorCentavos, parcelas))}</span>
                 <img src={asset("/assets/seta-dir.svg")} width={16} height={16} alt="" className="shrink-0" />
               </button>
             ) : (

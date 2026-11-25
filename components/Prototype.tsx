@@ -37,7 +37,7 @@ export default function Prototype() {
   const [sheetPessoa, setSheetPessoa] = useState(false);
   const [pessoa, setPessoa] = useState(PESSOAS[0].id);
   const [itens, setItens] = useState<Itens>({});
-  const [filtro, setFiltro] = useState<Filtro>("todos");
+  const [filtro, setFiltro] = useState<Filtro | null>(null);
   const [detalhe, setDetalhe] = useState<string | null>(null);
   const [metodo, setMetodo] = useState<MetodoId | null>(null);
   const [cartaoFinal, setCartaoFinal] = useState<string | null>(null);
@@ -237,7 +237,7 @@ export default function Prototype() {
               onContinuar={() => {
                 setSheetPessoa(false);
                 /* mantém o carrinho: sair e voltar ao fluxo de compra não o esvazia */
-                setFiltro("todos");
+                setFiltro(null);
                 setMetodo(null);
                 setAlertaN(0);
                 navegar("catalogo");
@@ -250,7 +250,7 @@ export default function Prototype() {
           <CatalogScreen
             itens={itens}
             filtro={filtro}
-            onFiltro={setFiltro}
+            onFiltro={(f) => setFiltro((atual) => (atual === f ? null : f))}
             onAbrir={setDetalhe}
             onVoltar={voltar}
             onCarrinho={() => navegar("carrinho")}

@@ -8,6 +8,8 @@ import {
   percentualDesconto,
   precoItem,
   resumo,
+  nomeItem,
+  rotuloTipo,
   type Filtro,
   type Itens,
   type Pacote,
@@ -22,20 +24,24 @@ export type AcoesItem = {
 
 type Props = AcoesItem & {
   itens: Itens;
-  filtro: Filtro;
+  /** null = sem filtro (vitrine inteira). */
+  filtro: Filtro | null;
+  /** Tocar no chip ativo desliga o filtro. */
   onFiltro: (f: Filtro) => void;
   onAbrir: (id: string) => void;
   onVoltar: () => void;
   onCarrinho: () => void;
 };
 
-const FILTROS: { id: Filtro; rotulo: string; largura: string }[] = [
-  { id: "todos", rotulo: "Todos", largura: "w-auto" },
-  { id: "descontos", rotulo: "Descontos", largura: "w-[108px]" },
-  { id: "individuais", rotulo: "Individuais", largura: "w-[108px]" },
+const FILTROS: { id: Filtro; rotulo: string }[] = [
+  { id: "descontos", rotulo: "Descontos" },
+  { id: "avulsas", rotulo: "Avulsas" },
+  { id: "pacotes", rotulo: "Pacotes" },
 ];
 
-export const GRADIENTE_CARD = "linear-gradient(162.86deg,#fff5e7 33.39%,#ffc992 150.93%)";
+/** Degradês por tipo: laranja = avulsa, roxo = pacote (mesmas paradas). */
+export const degrade = (pacote: boolean, angulo = 162.86) =>
+  `linear-gradient(${angulo}deg,${pacote ? "#f7f1fe" : "#fff5e7"} 33.39%,${pacote ? "#d1b4f6" : "#ffc992"} 150.93%)`;
 
 /** Telas 3 e 5 — "Comprar consulta" (catálogo) e item adicionado com barra do carrinho. */
 export default function CatalogScreen({ itens, filtro, onFiltro, onAbrir, onVoltar, onCarrinho, ...acoes }: Props) {
@@ -47,14 +53,14 @@ export default function CatalogScreen({ itens, filtro, onFiltro, onAbrir, onVolt
       <Header titulo="Comprar consulta" onVoltar={onVoltar} />
       <h2 className="text-2xl font-semibold">Selecione as consultas que deseja comprar</h2>
 
-      <div className="flex gap-2" role="group" aria-label="Filtrar pacotes">
+      <div className="flex gap-2" role="group" aria-label="Filtros">
         {FILTROS.map((f) => (
           <button
             key={f.id}
             type="button"
             aria-pressed={filtro === f.id}
             onClick={() => onFiltro(f.id)}
-            className={`flex justify-center rounded-full border p-2.5 text-xs whitespace-nowrap ${f.largura} ${filtro === f.id ? "border-black" : "border-[#dcdcdc]"}`}
+            className={`flex w-[108px] justify-center rounded-full border p-2.5 text-xs whitespace-nowrap ${filtro === f.id ? "border-black" : "border-[#dcdcdc]"}`}
           >
             {f.rotulo}
           </button>
@@ -68,7 +74,7 @@ export default function CatalogScreen({ itens, filtro, onFiltro, onAbrir, onVolt
           </li>
         ))}
       </ul>
-      {lista.length === 0 && <p className="text-center text-sm text-muted">Nenhum pacote neste filtro.</p>}
+      {lista.length === 0 && <p className="text-center text-sm text-muted">Nenhuma consulta neste filtro.</p>}
 
       {total.quantidade > 0 && (
         <BarraInferior>
@@ -84,7 +90,7 @@ type CardProps = AcoesItem & { pacote: Pacote; qtd: number; onAbrir?: () => void
 /** Card do catálogo (também usado em "Compre também"). Com o item no carrinho, tocar no card abre o detalhe. */
 export function PacoteCard({ pacote: p, qtd, onComprar, onMais, onMenos, onRemover, onAbrir, className = "" }: CardProps) {
   const un = precoItem(p, 1);
-  const nome = p.tag ?? p.linhas[0];
+  const nome = nomeItem(p);
   const linhas = p.linhas; /* consultas fixas do pacote (ex.: "2 Psicologias"); não mudam com a quantidade */
   const abrivel = qtd > 0 && onAbrir;
   return (
@@ -95,15 +101,15 @@ export function PacoteCard({ pacote: p, qtd, onComprar, onMais, onMenos, onRemov
       }}
       className={`flex flex-col gap-4 overflow-hidden rounded-2xl border border-[#dcdcdc] bg-white ${abrivel ? "cursor-pointer" : ""} ${className}`}
     >
-      {/* Figma 97:137: topo em degradê com tag e consultas; preço e ação no fundo branco */}
-      <div className="flex flex-col gap-[35px] p-3" style={{ background: GRADIENTE_CARD }}>
-        {/* Sem tag, a linha fica invisível para manter o alinhamento entre cards */}
-        <div className={`flex h-[23px] items-center justify-between ${p.tag ? "" : "invisible"}`} aria-hidden={!p.tag}>
-          <span className="text-[10px] font-bold whitespace-nowrap text-wine">{p.tag ?? "—"}</span>
-          <Selo pct={percentualDesconto(p)} />
+      {/* Figma 97:137: topo em degradê (laranja = avulsa, roxo = pacote) com tag e consultas; preço e ação no fundo branco */}
+      <div className={`flex flex-col gap-[35px] p-3 ${p.tag ? "text-roxo" : "text-wine"}`} style={{ background: degrade(!!p.tag) }}>
+        {/* Avulsa: só a tag "AVULSO" (sem selo, não tem desconto com 1 unidade); a altura da linha é a mesma */}
+        <div className="flex h-[23px] items-center justify-between">
+          <span className="text-[10px] font-bold whitespace-nowrap">{rotuloTipo(p)}</span>
+          {p.tag && <Selo pct={percentualDesconto(p)} />}
         </div>
         {/* Com uma linha só, a consulta fica embaixo; a linha de cima é reservada e invisível */}
-        <div className="flex flex-col gap-1 text-xl leading-[normal] text-wine">
+        <div className="flex flex-col gap-1 text-xl leading-[normal]">
           {linhas[1] ? (
             <>
               <span>{linhas[0]}</span>
@@ -123,7 +129,7 @@ export function PacoteCard({ pacote: p, qtd, onComprar, onMais, onMenos, onRemov
       </div>
       <div className="px-3 pb-3">
         {qtd > 0 ? (
-          <Stepper qtd={qtd} nome={nome} onMais={() => onMais(p.id)} onMenos={() => onMenos(p.id)} onRemover={() => onRemover(p.id)} className="border border-[#dcdcdc]" />
+          <Stepper laranja qtd={qtd} nome={nome} onMais={() => onMais(p.id)} onMenos={() => onMenos(p.id)} onRemover={() => onRemover(p.id)} className="border border-[#dcdcdc]" />
         ) : (
           <button type="button" onClick={() => onComprar(p.id)} className="flex h-10 w-full items-center justify-center rounded-lg bg-cta px-4 text-sm font-medium whitespace-nowrap text-white">
             Comprar agora
