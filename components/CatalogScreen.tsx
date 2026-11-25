@@ -36,7 +36,7 @@ const FILTROS: { id: Filtro; rotulo: string; largura: string }[] = [
   { id: "individuais", rotulo: "Individuais", largura: "w-[108px]" },
 ];
 
-export const GRADIENTE_CARD = "linear-gradient(150deg,#fff5e7 33.39%,#ffc992 150.93%)";
+export const GRADIENTE_CARD = "linear-gradient(162.86deg,#fff5e7 33.39%,#ffc992 150.93%)";
 
 /** Telas 3 e 5 — "Comprar consulta" (catálogo) e item adicionado com barra do carrinho. */
 export default function CatalogScreen({ itens, filtro, onFiltro, onAbrir, onVoltar, onCarrinho, ...acoes }: Props) {
@@ -94,31 +94,43 @@ export function PacoteCard({ pacote: p, qtd, onComprar, onMais, onMenos, onRemov
       onClick={(e) => {
         if (abrivel && !(e.target as HTMLElement).closest("button")) onAbrir();
       }}
-      className={`flex flex-col gap-6 overflow-hidden rounded-xl p-3 ${abrivel ? "cursor-pointer" : ""} ${className}`}
-      style={{ background: GRADIENTE_CARD }}
+      className={`flex flex-col gap-4 overflow-hidden rounded-2xl border border-[#dcdcdc] bg-white ${abrivel ? "cursor-pointer" : ""} ${className}`}
     >
-      {/* Sem tag, a linha fica invisível para manter o alinhamento entre cards (como no Figma) */}
-      <div className={`flex items-center justify-between ${p.tag ? "" : "invisible"}`} aria-hidden={!p.tag}>
-        <span className="text-[10px] font-bold whitespace-nowrap text-wine">{p.tag ?? "—"}</span>
-        <Selo pct={percentualDesconto(p)} />
-      </div>
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1 text-xl text-wine">
-          <span>{linhas[0]}</span>
-          <span className={linhas[1] ? "" : "invisible"} aria-hidden={!linhas[1]}>{linhas[1] ?? linhas[0]}</span>
+      {/* Figma 97:137: topo em degradê com tag e consultas; preço e ação no fundo branco */}
+      <div className="flex flex-col gap-[35px] p-3" style={{ background: GRADIENTE_CARD }}>
+        {/* Sem tag, a linha fica invisível para manter o alinhamento entre cards */}
+        <div className={`flex h-[23px] items-center justify-between ${p.tag ? "" : "invisible"}`} aria-hidden={!p.tag}>
+          <span className="text-[10px] font-bold whitespace-nowrap text-wine">{p.tag ?? "—"}</span>
+          <Selo pct={percentualDesconto(p)} />
         </div>
-        <div className="flex flex-col gap-2 leading-none">
-          <s className={`text-xs text-wine/50 ${un.deCentavos > un.porCentavos ? "" : "invisible"}`}>{formatarBRL(un.deCentavos)}</s>
-          <span className="text-base font-semibold text-wine">{formatarBRL(un.porCentavos)}</span>
+        {/* Com uma linha só, a consulta fica embaixo; a linha de cima é reservada e invisível */}
+        <div className="flex flex-col gap-1 text-xl leading-[normal] text-wine">
+          {linhas[1] ? (
+            <>
+              <span>{linhas[0]}</span>
+              <span>{linhas[1]}</span>
+            </>
+          ) : (
+            <>
+              <span className="invisible" aria-hidden>{linhas[0]}</span>
+              <span>{linhas[0]}</span>
+            </>
+          )}
         </div>
       </div>
-      {qtd > 0 ? (
-        <Stepper qtd={qtd} nome={nome} onMais={() => onMais(p.id)} onMenos={() => onMenos(p.id)} onRemover={() => onRemover(p.id)} />
-      ) : (
-        <button type="button" onClick={() => onComprar(p.id)} className="flex h-10 items-center justify-center rounded-lg bg-cta px-4 text-sm font-medium whitespace-nowrap text-white">
-          Comprar agora
-        </button>
-      )}
+      <div className="flex flex-col gap-2 px-3 leading-none">
+        <s className={`text-xs leading-none text-[#808080] ${un.deCentavos > un.porCentavos ? "" : "invisible"}`}>{formatarBRL(un.deCentavos)}</s>
+        <span className="text-base leading-none font-semibold text-black">{formatarBRL(un.porCentavos)}</span>
+      </div>
+      <div className="px-3 pb-3">
+        {qtd > 0 ? (
+          <Stepper qtd={qtd} nome={nome} onMais={() => onMais(p.id)} onMenos={() => onMenos(p.id)} onRemover={() => onRemover(p.id)} className="border border-[#dcdcdc]" />
+        ) : (
+          <button type="button" onClick={() => onComprar(p.id)} className="flex h-10 w-full items-center justify-center rounded-lg bg-cta px-4 text-sm font-medium whitespace-nowrap text-white">
+            Comprar agora
+          </button>
+        )}
+      </div>
     </article>
   );
 }

@@ -170,7 +170,7 @@ export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alert
           <h2 className="text-base font-semibold">Compre também</h2>
           <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
             {sugestoes.map((p) => (
-              <PacoteCard key={p.id} pacote={p} qtd={0} className="w-[175px] flex-none snap-start" {...acoes} />
+              <PacoteCard key={p.id} pacote={p} qtd={0} className="w-[190px] flex-none snap-start" {...acoes} />
             ))}
           </div>
         </section>
