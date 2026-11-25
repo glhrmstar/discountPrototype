@@ -12,7 +12,7 @@ export type Pacote = {
   tag?: string;
   /**
    * Consultas incluídas em 1 unidade, uma por linha (o card reserva sempre duas linhas).
-   * Pacotes: "<n> <Especialidade>". Individuais: só o nome; a quantidade vem do contador (ver linhasItem).
+   * Pacotes: "<n> <Especialidade>". Individuais: só o nome. Fixas: não mudam com a quantidade no carrinho.
    */
   linhas: [string] | [string, string];
   precoDeCentavos: number;
@@ -158,23 +158,3 @@ export function consultasPorEspecialidade(itens: Itens, pacotes: readonly Pacote
 
 export const rotuloConsultas = (n: number) => `${n} ${n === 1 ? "Consulta" : "Consultas"}`;
 
-/** Plural das especialidades que mudam ("2 Psicologias"); as demais ficam iguais ("2 Nutri", "2 Clínico geral"). */
-const PLURAL: Readonly<Record<string, string>> = { Psicologia: "Psicologias", Psiquiatria: "Psiquiatrias", Especialista: "Especialistas" };
-const SINGULAR: Readonly<Record<string, string>> = Object.fromEntries(Object.entries(PLURAL).map(([s, p]) => [p, s]));
-
-/**
- * Linhas do item multiplicadas pela quantidade (carrinho, detalhe e card já adicionado).
- * Ex.: Check-up ×2 → ["2 Clínico geral", "2 Nutri"]; Terapia em dia ×2 → ["4 Psicologias"].
- * Individual: com 1 unidade só o nome ("Psicologia"); a partir de 2, "2 Psicologias". Sem quantidade, as linhas do catálogo.
- */
-export function linhasItem(p: Pacote, qtd: number): string[] {
-  if (!Number.isInteger(qtd) || qtd <= 0) return [...p.linhas];
-  return p.linhas.map((linha) => {
-    const m = /^(\d+)\s+(.+)$/.exec(linha.trim());
-    const nomeLinha = m ? m[2] : linha.trim();
-    const base = SINGULAR[nomeLinha] ?? nomeLinha;
-    const n = (m ? Number(m[1]) : 1) * qtd;
-    if (ehIndividual(p) && n === 1) return base;
-    return `${n} ${n > 1 ? (PLURAL[base] ?? base) : base}`;
-  });
-}

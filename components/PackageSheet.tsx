@@ -1,7 +1,7 @@
 "use client";
 
 import { BotaoVerCarrinho, Progresso, Selo, Sheet, Stepper, Totais } from "@/components/ui";
-import { ehIndividual, formatarBRL, linhasItem, percentualDesconto, precoItem, type Itens, type Pacote } from "@/lib/catalogo";
+import { ehIndividual, formatarBRL, percentualDesconto, precoItem, type Itens, type Pacote } from "@/lib/catalogo";
 
 type Props = {
   pacote: Pacote;
@@ -31,7 +31,7 @@ export default function PackageSheet({ pacote: p, itens, onMais, onMenos, onLimp
             </div>
           )}
           <div className="flex flex-col gap-1 text-[32px]">
-            {linhasItem(p, qtd).map((l) => <span key={l}>{l}</span>)}
+            {p.linhas.map((l) => <span key={l}>{l}</span>)}
           </div>
         </div>
         {ehIndividual(p) && <Progresso qtd={qtd} />}
