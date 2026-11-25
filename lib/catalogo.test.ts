@@ -16,20 +16,38 @@ import {
   remover,
   resumo,
   rotuloItens,
+  rotuloTipo,
+  nomeItem,
+  temPacote,
   type Itens,
 } from "./catalogo";
 
 const psicologia = pacotePorId("psicologia")!;
 
-describe("filtrar", () => {
-  it("Todos devolve o catálogo inteiro", () => {
-    expect(filtrar(PACOTES, "todos")).toHaveLength(PACOTES.length);
+describe("vitrine", () => {
+  it("abre com a avulsa e o pacote mais vendidos", () => {
+    expect(PACOTES.slice(0, 2).map((p) => p.id)).toEqual(["nutricionista", "terapia-em-dia"]);
   });
-  it("Descontos devolve só pacotes com tag", () => {
-    expect(filtrar(PACOTES, "descontos").map((p) => p.id)).toEqual(["terapia-em-dia", "check-up", "equilibrio", "mental"]);
+  it("sem filtro devolve o catálogo inteiro", () => {
+    expect(filtrar(PACOTES, null)).toHaveLength(PACOTES.length);
   });
-  it("Individuais devolve só pacotes sem tag", () => {
-    expect(filtrar(PACOTES, "individuais").map((p) => p.id)).toEqual(["psicologia", "especialista"]);
+  it("Descontos devolve só itens com preço riscado", () => {
+    expect(filtrar(PACOTES, "descontos").map((p) => p.id)).toEqual(["terapia-em-dia", "mental", "equilibrio", "check-up"]);
+  });
+  it("Avulsas devolve só itens sem tag", () => {
+    expect(filtrar(PACOTES, "avulsas").map((p) => p.id)).toEqual(["nutricionista", "psiquiatria", "psicologia", "clinico-geral", "especialista"]);
+  });
+  it("Pacotes devolve só itens com tag", () => {
+    expect(filtrar(PACOTES, "pacotes").map((p) => p.id)).toEqual(["terapia-em-dia", "mental", "equilibrio", "check-up"]);
+  });
+  it("rótulo de tipo e compra com pacote", () => {
+    expect(rotuloTipo(pacotePorId("psicologia")!)).toBe("AVULSO");
+    expect(rotuloTipo(pacotePorId("mental")!)).toBe("PACOTE");
+    expect(temPacote({ psicologia: 2 })).toBe(false);
+    expect(temPacote({ psicologia: 1, "check-up": 1 })).toBe(true);
+    expect(temPacote({ mental: 0 })).toBe(false);
+    expect(nomeItem(pacotePorId("mental")!)).toBe("Pacote 1 Psiquiatria e 2 Psicologias");
+    expect(nomeItem(pacotePorId("psicologia")!)).toBe("Psicologia");
   });
 });
 
@@ -79,8 +97,8 @@ describe("resumo", () => {
   it("soma pacotes com desconto fixo e individuais com faixa", () => {
     expect(resumo({ "check-up": 1, psicologia: 2 })).toEqual({
       quantidade: 3,
-      totalDeCentavos: 19980,
-      totalPorCentavos: 13483,
+      totalDeCentavos: 26960,
+      totalPorCentavos: 16973,
     });
   });
   it("ignora ids desconhecidos e quantidades inválidas", () => {
@@ -98,8 +116,11 @@ describe("formatação", () => {
     expect(formatarBRL(123456)).toBe("R$ 1.234,56");
   });
   it("percentual de desconto de pacote", () => {
-    expect(percentualDesconto(PACOTES[0])).toBe(50);
-    expect(percentualDesconto({ ...PACOTES[0], precoPorCentavos: 10000 })).toBe(0);
+    const terapia = pacotePorId("terapia-em-dia")!;
+    expect(percentualDesconto(terapia)).toBe(50);
+    expect(percentualDesconto(pacotePorId("mental")!)).toBe(39);
+    expect(percentualDesconto(pacotePorId("equilibrio")!)).toBe(24);
+    expect(percentualDesconto({ ...terapia, precoPorCentavos: terapia.precoDeCentavos })).toBe(0);
   });
   it("singular e plural", () => {
     expect(rotuloItens(1)).toBe("1 Item");

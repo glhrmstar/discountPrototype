@@ -31,7 +31,7 @@ export default function Skeleton({ tela }: { tela: TelaComSkeleton }) {
       <div aria-busy="true" aria-label="Carregando" className="flex flex-col gap-6 px-4">
         <Header titulo="Comprar consulta" />
         <Col><K w="88%" h={26} /><K w="62%" h={26} /></Col>
-        <div className="flex gap-2"><K w="57px" h={37} r={999} /><K w="108px" h={37} r={999} /><K w="108px" h={37} r={999} /></div>
+        <div className="flex gap-2"><K w="108px" h={37} r={999} /><K w="108px" h={37} r={999} /><K w="108px" h={37} r={999} /></div>
         <div className="grid grid-cols-2 gap-2">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="flex flex-col gap-6 rounded-xl bg-[#f7f8fa] p-3">
@@ -51,9 +51,12 @@ export default function Skeleton({ tela }: { tela: TelaComSkeleton }) {
         <div className="flex flex-col gap-4">
           <K w="170px" h={18} />
           {[0, 1].map((i) => (
-            <div key={i} className="flex flex-col gap-4 rounded-xl border border-[#dcdcdc] p-3">
-              <Row><K w="30%" h={12} /><K w="64px" h={22} r={999} /></Row>
-              <Row><K w="55%" h={22} /><K w="70px" h={30} /></Row>
+            <div key={i} className="flex flex-col gap-4 border-b border-[#dcdcdc] pb-6">
+              <div className="flex items-start gap-3">
+                <K w="42px" h={74} r={12} />
+                <div className="flex flex-1 flex-col gap-2"><K w="45%" h={12} /><K w="70%" h={20} /><K w="40%" h={20} /></div>
+                <K w="64px" h={30} />
+              </div>
               <Row><K w="60px" h={18} /><K w="138px" h={40} /></Row>
             </div>
           ))}

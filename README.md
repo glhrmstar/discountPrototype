@@ -2,17 +2,18 @@
 
 Protótipo mobile da **nova UX de descontos B2C (compra avulsa)** da Starbem, feito em Next.js + Tailwind a partir do Figma "Compra avulsa".
 
-> Protótipo navegável, não é o app de produção: dados fictícios, preços do mock do Figma e sem integração com API.
+> Protótipo navegável, não é o app de produção: dados fictícios, preços da tabela atual (a validar) e sem integração com API.
 
 ## Fluxo
 
 1. **Home**: toque em **Comprar** na barra inferior.
 2. **Pra quem deseja comprar?**: escolha o titular ou um dependente e toque em **Continuar**.
-3. **Comprar consulta**: filtre por Todos / Descontos / Individuais e toque em **Comprar agora**.
-4. **Detalhe do pacote** (gaveta): pacotes com desconto mostram o preço com 50% OFF; consultas individuais mostram o **desconto progressivo** (2/4/6/8 consultas → 15/20/25/30%). Use **+**/**−**, a lixeira ou **Limpar**.
+3. **Comprar consulta**: a vitrine abre com a avulsa mais vendida (Nutricionista) e o pacote mais vendido (2 Psicologias), depois intercala o resto por volume de vendas. Os filtros **Descontos** (itens com preço riscado), **Avulsas** e **Pacotes** são opcionais: tocar de novo no chip ativo volta à vitrine inteira.
+   - Cards de **avulsa** são laranja com a tag "AVULSO"; cards de **pacote** são roxos (`#F7F1FE` → `#D1B4F6`, texto `#5A40B5`) com a tag "PACOTE" (ou o nome, como "Check-up") e o selo de % OFF.
+4. **Detalhe do pacote** (gaveta): pacotes mostram o preço com o % OFF calculado do "de/por"; consultas avulsas mostram o **desconto progressivo** (2/4/6/8 consultas → 15/20/25/30%). Use **+**/**−**, a lixeira ou **Limpar**.
 5. **Item adicionado**: tocar no card reabre o detalhe; a barra mostra o total e **Ver carrinho**.
    - As consultas de cada item são fixas (ex.: "2 Psicologias") e não mudam com a quantidade; a quantidade aparece só no contador. Consulta individual mostra só o nome ("Psicologia").
-6. **Revisar carrinho**: itens, **Método de pagamento** (radios: Pix, cartão salvo, novo cartão, Apple Pay), **Resumo dos valores** e **Compre também** (carrossel).
+6. **Revisar carrinho**: itens em lista (miniatura laranja/roxa, tipo e % OFF, consultas, preço "de" riscado e "por", **Remover** e contador), **Método de pagamento** (radios: Pix, cartão salvo, novo cartão, Apple Pay), **Resumo dos valores** e **Compre também** (carrossel).
    - "Novo cartão de crédito" abre a gaveta **Novo cartão** já com **dados de exemplo** (fictícios, cartão de teste Mastercard) e o foco no primeiro campo, para o teclado do celular subir junto. Os campos têm máscara.
    - O campo **Parcelas** é um dropdown: a lista com 1x ou 2x sem juros abre logo abaixo do campo.
    - **Salvar cartão para compras futuras** é opcional e começa desmarcado. Sem marcar, o cartão vale só para esta compra e some depois do pagamento.
@@ -22,7 +23,7 @@ Protótipo mobile da **nova UX de descontos B2C (compra avulsa)** da Starbem, fe
    - **Cartão recusado**: abra o protótipo com `?falha=1` para simular a recusa no pagamento. Depois do loading aparece a gaveta **Cartão recusado**; **Entendi** volta ao carrinho, que continua igual.
    - **Falha ao salvar o cartão**: com `?falhaSalvar=1`, confirmar o Novo cartão com **Salvar cartão** marcado mostra **Falha ao adicionar o cartão** por cima do formulário; **Entendi** volta ao formulário com os dados. Os dois parâmetros podem ser usados juntos (`?falha=1&falhaSalvar=1`).
 8. **Aguardando pagamento (Pix)**: QR ilustrativo, total, contagem regressiva de 30 min e **Copiar código** (fictício). Tocar no QR simula a confirmação do pagamento. Sair (seta ou voltar do navegador) pede confirmação: **Sair** volta ao carrinho e **Continuar** mantém o QR.
-9. **Pagamento concluído**: uma carta por consulta comprada (até 6) abrindo em leque, e os blocos entram um depois do outro. Depois, consultas compradas por especialidade, método usado e resumo dos valores. Cartão e Apple Pay chegam aqui direto depois do loading. O carrinho é esvaziado; **Voltar** leva à Home e **Agendar consulta** mostra um aviso (tela ainda não desenhada).
+9. **Pagamento concluído**: uma carta por consulta comprada (até 6) abrindo em leque — **roxas** se a compra tem algum pacote, **laranja** se só tem avulsas — e os blocos entram um depois do outro. Depois, consultas compradas por especialidade, método usado e resumo dos valores. Cartão e Apple Pay chegam aqui direto depois do loading. O carrinho é esvaziado; **Voltar** leva à Home e **Agendar consulta** mostra um aviso (tela ainda não desenhada).
 
 O **carrinho fica salvo**: sair do fluxo de compra (ou fechar a página) não o esvazia. Na Home, o "Comprar" mostra quantos itens estão salvos, e ao voltar o catálogo já abre com eles. Fica no `localStorage` do navegador por 7 dias, só com pacotes, quantidades e a pessoa escolhida.
 
@@ -72,7 +73,9 @@ O workflow define `NEXT_PUBLIC_BASE_PATH=/<nome-do-repo>`; se renomear o reposit
 
 ## Pendências conhecidas
 
-- Preços, percentuais e faixas do desconto progressivo são placeholders do Figma; precisam vir da regra de negócio de descontos B2C (inclusive se a faixa conta por item ou pelo total de individuais).
+- Preços vêm da tabela atual de avulsas e pacotes, mas precisam vir da regra de negócio de descontos B2C (inclusive se a faixa conta por item ou pelo total de avulsas).
+- O preço "de" dos pacotes precisa ser um preço de referência real (CDC). Hoje ele não bate com a soma das avulsas (ex.: 2 Psicologias somam R$ 99,80 avulsas e o "de" é R$ 199,80). Validar com jurídico e comercial antes de produção.
+- O filtro **Descontos** hoje mostra os mesmos itens de **Pacotes**, porque só os pacotes têm preço riscado com 1 unidade.
 - Correções de texto feitas no código e que ainda precisam ir para o Figma: acentos ("Clínico", "Endócrino", "Equilíbrio"), "desja" → "deseja", "Copie e o cole" → "Copie e cole", seções do cartão ("Dados do cartão" / "Endereço de cobrança"), campo "Cidade" e máscara de CPF `000.000.000-00`.
 - O QR do Figma é escaneável e aponta para um site de terceiros; aqui o QR é ilustrativo (não é lido) e o código copiado é fictício.
 - Texto e cor do alerta "Selecione um método de pagamento" (`#D92D20`) não estão no Figma.
