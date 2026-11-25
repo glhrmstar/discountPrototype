@@ -10,16 +10,29 @@ const ABRE_MS = 350;
 const ESCALONA_MS = 60;
 const DURACAO_MS = 700;
 
-export type Carta = { anguloGraus: number; atrasoMs: number };
+/** roxa = consulta de pacote; laranja (roxa: false) = consulta avulsa. */
+export type Carta = { anguloGraus: number; atrasoMs: number; roxa: boolean };
 export type Leque = { cartas: Carta[]; alturaPx: number; textoAposMs: number };
 
-export function montarLeque(totalConsultas: number): Leque {
+/**
+ * Cor de cada carta pelo que foi comprado: só avulsas = laranja, só pacotes = roxa, compra mista = as duas.
+ * Na mista a proporção segue as consultas (com pelo menos 1 carta de cada cor) e as cores são intercaladas.
+ */
+export function coresLeque(n: number, consultasDePacote: number, totalConsultas: number): boolean[] {
+  let roxas = totalConsultas > 0 ? Math.round((n * consultasDePacote) / totalConsultas) : 0;
+  if (consultasDePacote > 0 && consultasDePacote < totalConsultas) roxas = Math.min(n - 1, Math.max(1, roxas));
+  return Array.from({ length: n }, (_, i) => Math.floor(((i + 1) * roxas) / n) > Math.floor((i * roxas) / n));
+}
+
+export function montarLeque(totalConsultas: number, consultasDePacote = 0): Leque {
   const n = Math.max(1, Math.min(LEQUE_MAX, Math.floor(totalConsultas) || 1));
+  const roxas = coresLeque(n, consultasDePacote, Math.floor(totalConsultas) || 0);
   const passo = n > 1 ? Math.min(30, 90 / (n - 1)) : 0;
   const meio = (n - 1) / 2;
   const cartas = Array.from({ length: n }, (_, i) => ({
     anguloGraus: Number(((i - meio) * passo).toFixed(2)),
     atrasoMs: Math.round(ABRE_MS + Math.abs(i - meio) * ESCALONA_MS),
+    roxa: roxas[i],
   }));
   /* canto mais baixo da carta mais inclinada, para o leque não encostar no título */
   const t = (meio * passo * Math.PI) / 180;

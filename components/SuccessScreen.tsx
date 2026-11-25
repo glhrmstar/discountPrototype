@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { iconeMetodo } from "@/components/CartScreen";
 import { BarraInferior } from "@/components/ui";
-import { consultasPorEspecialidade, formatarBRL, resumo, rotuloConsultas, temPacote, type Itens } from "@/lib/catalogo";
+import { consultasPorEspecialidade, consultasPorTipo, formatarBRL, resumo, rotuloConsultas, type Itens } from "@/lib/catalogo";
 import { CARTA, montarLeque } from "@/lib/leque";
 import { valorParcela, type MetodoId } from "@/lib/pagamento";
 
@@ -18,9 +18,9 @@ export default function SuccessScreen({ pedido, onVoltar, onAgendar }: Props) {
   const consultas = consultasPorEspecialidade(pedido.itens);
   const nomeMetodo = pedido.metodo === "cartao" && pedido.cartaoFinal ? `**** ${pedido.cartaoFinal}` : NOME_METODO[pedido.metodo];
   const linha = "flex h-12 items-center justify-between gap-3 px-3";
-  const leque = montarLeque(consultas.reduce((t, [, n]) => t + n, 0));
-  /* compra com algum pacote = cartas roxas; só avulsas = laranja */
-  const roxo = temPacote(pedido.itens);
+  /* cor de cada carta pelo que foi comprado: avulsa laranja, pacote roxa, compra mista as duas */
+  const porTipo = consultasPorTipo(pedido.itens);
+  const leque = montarLeque(porTipo.pacote + porTipo.avulsa, porTipo.pacote);
   /* entrada gradual: cada bloco entra depois do anterior, quando o leque termina de abrir */
   const entra = (ordem: number) => ({ style: { "--ordem": ordem, "--depois": `${leque.textoAposMs}ms` } as CSSProperties });
 
@@ -32,7 +32,7 @@ export default function SuccessScreen({ pedido, onVoltar, onAgendar }: Props) {
           {leque.cartas.map((c, i) => (
             <span
               key={i}
-              className={`leque-carta absolute rounded-xl ${roxo ? "bg-[linear-gradient(145.98deg,#f7f1fe_33.39%,#d1b4f6_150.93%)] shadow-[0_1px_4px_rgba(90,64,181,.16)]" : "bg-[linear-gradient(145.98deg,#fff5e7_33.39%,#ffc992_150.93%)] shadow-[0_1px_4px_rgba(255,140,60,.16)]"}`}
+              className={`leque-carta absolute rounded-xl ${c.roxa ? "bg-[linear-gradient(145.98deg,#f7f1fe_33.39%,#d1b4f6_150.93%)] shadow-[0_1px_4px_rgba(90,64,181,.16)]" : "bg-[linear-gradient(145.98deg,#fff5e7_33.39%,#ffc992_150.93%)] shadow-[0_1px_4px_rgba(255,140,60,.16)]"}`}
               style={{ top: CARTA.topo, left: `calc(50% - ${CARTA.largura / 2}px)`, width: CARTA.largura, height: CARTA.altura, "--a": `${c.anguloGraus}deg`, "--d": `${c.atrasoMs}ms` } as CSSProperties}
             />
           ))}
