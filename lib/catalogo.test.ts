@@ -18,7 +18,7 @@ import {
   rotuloItens,
   rotuloTipo,
   nomeItem,
-  temPacote,
+  consultasPorTipo,
   type Itens,
 } from "./catalogo";
 
@@ -43,9 +43,9 @@ describe("vitrine", () => {
   it("rótulo de tipo e compra com pacote", () => {
     expect(rotuloTipo(pacotePorId("psicologia")!)).toBe("AVULSO");
     expect(rotuloTipo(pacotePorId("mental")!)).toBe("PACOTE");
-    expect(temPacote({ psicologia: 2 })).toBe(false);
-    expect(temPacote({ psicologia: 1, "check-up": 1 })).toBe(true);
-    expect(temPacote({ mental: 0 })).toBe(false);
+    expect(consultasPorTipo({ psicologia: 2 })).toEqual({ pacote: 0, avulsa: 2 });
+    expect(consultasPorTipo({ mental: 1, nutricionista: 2 })).toEqual({ pacote: 3, avulsa: 2 });
+    expect(consultasPorTipo({ "check-up": 2, mental: 0 })).toEqual({ pacote: 4, avulsa: 0 });
     expect(nomeItem(pacotePorId("mental")!)).toBe("Pacote 1 Psiquiatria e 2 Psicologias");
     expect(nomeItem(pacotePorId("psicologia")!)).toBe("Psicologia");
   });

@@ -57,9 +57,18 @@ export const ehIndividual = (p: Pacote) => !p.tag;
 export const nomeItem = (p: Pacote) => (p.tag ? `Pacote ${p.linhas.join(" e ")}` : p.linhas[0]);
 /** Rótulo de tipo mostrado nos cards e no carrinho. */
 export const rotuloTipo = (p: Pacote) => p.tag ?? "AVULSO";
-/** A compra tem algum pacote? Define a versão roxa da tela de conclusão. */
-export const temPacote = (itens: Itens, pacotes: readonly Pacote[] = PACOTES) =>
-  Object.entries(itens).some(([id, qtd]) => qtd > 0 && !!pacotes.find((p) => p.id === id)?.tag);
+/** Quantas consultas vieram de pacotes e quantas de avulsas. Define a cor das cartas da tela de conclusão. */
+export function consultasPorTipo(itens: Itens, pacotes: readonly Pacote[] = PACOTES): { pacote: number; avulsa: number } {
+  const porId = new Map(pacotes.map((p) => [p.id, p]));
+  const total = { pacote: 0, avulsa: 0 };
+  for (const [id, qtd] of Object.entries(itens)) {
+    const p = porId.get(id);
+    if (!p || !Number.isInteger(qtd) || qtd <= 0) continue;
+    const n = p.linhas.reduce((t, l) => t + (Number(/^(\d+)\s/.exec(l.trim())?.[1]) || 1), 0) * qtd;
+    total[p.tag ? "pacote" : "avulsa"] += n;
+  }
+  return total;
+}
 
 /** Desconto progressivo das consultas individuais: [consultas, % de desconto]. Contado por item. */
 export const FAIXAS: readonly (readonly [number, number])[] = [
