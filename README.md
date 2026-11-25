@@ -11,7 +11,7 @@ Protótipo mobile da **nova UX de descontos B2C (compra avulsa)** da Starbem, fe
 3. **Comprar consulta**: filtre por Todos / Descontos / Individuais e toque em **Comprar agora**.
 4. **Detalhe do pacote** (gaveta): pacotes com desconto mostram o preço com 50% OFF; consultas individuais mostram o **desconto progressivo** (2/4/6/8 consultas → 15/20/25/30%). Use **+**/**−**, a lixeira ou **Limpar**.
 5. **Item adicionado**: tocar no card reabre o detalhe; a barra mostra o total e **Ver carrinho**.
-   - A quantidade de consultas acompanha o contador no carrinho, no detalhe e no card adicionado: Check-up ×2 mostra "2 Clínico geral / 2 Nutri". Consulta individual mostra só o nome com 1 unidade ("Psicologia") e o número a partir de 2 ("2 Psicologias").
+   - As consultas de cada item são fixas (ex.: "2 Psicologias") e não mudam com a quantidade; a quantidade aparece só no contador. Consulta individual mostra só o nome ("Psicologia").
 6. **Revisar carrinho**: itens, **Método de pagamento** (radios: Pix, cartão salvo, novo cartão, Apple Pay), **Resumo dos valores** e **Compre também** (carrossel).
    - "Novo cartão de crédito" abre a gaveta **Novo cartão** já com **dados de exemplo** (fictícios, cartão de teste Mastercard) e o foco no primeiro campo, para o teclado do celular subir junto. Os campos têm máscara.
    - O campo **Parcelas** é um dropdown: a lista com 1x ou 2x sem juros abre logo abaixo do campo.

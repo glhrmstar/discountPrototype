@@ -5,7 +5,6 @@ import {
   PACOTES,
   filtrar,
   formatarBRL,
-  linhasItem,
   percentualDesconto,
   precoItem,
   resumo,
@@ -86,7 +85,7 @@ type CardProps = AcoesItem & { pacote: Pacote; qtd: number; onAbrir?: () => void
 export function PacoteCard({ pacote: p, qtd, onComprar, onMais, onMenos, onRemover, onAbrir, className = "" }: CardProps) {
   const un = precoItem(p, 1);
   const nome = p.tag ?? p.linhas[0];
-  const linhas = linhasItem(p, qtd); /* com o item no carrinho, a quantidade de consultas acompanha o contador */
+  const linhas = p.linhas; /* consultas fixas do pacote (ex.: "2 Psicologias"); não mudam com a quantidade */
   const abrivel = qtd > 0 && onAbrir;
   return (
     <article

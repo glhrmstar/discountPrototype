@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   consultasPorEspecialidade,
-  linhasItem,
   rotuloConsultas,
   LIMITE_POR_PACOTE,
   PACOTES,
@@ -126,20 +125,3 @@ describe("consultasPorEspecialidade", () => {
   });
 });
 
-describe("linhasItem", () => {
-  const p = (id: string) => pacotePorId(id)!;
-  it("sem quantidade, as linhas do catálogo (individual sem número)", () => {
-    expect(linhasItem(p("check-up"), 0)).toEqual(["1 Clínico geral", "1 Nutri"]);
-    expect(linhasItem(p("psicologia"), 0)).toEqual(["Psicologia"]);
-  });
-  it("pacote multiplica cada consulta pela quantidade", () => {
-    expect(linhasItem(p("check-up"), 2)).toEqual(["2 Clínico geral", "2 Nutri"]);
-    expect(linhasItem(p("terapia-em-dia"), 2)).toEqual(["4 Psicologias"]);
-    expect(linhasItem(p("mental"), 2)).toEqual(["2 Psiquiatrias", "4 Psicologias"]);
-  });
-  it("individual: só o nome com 1, número e plural a partir de 2", () => {
-    expect(linhasItem(p("psicologia"), 1)).toEqual(["Psicologia"]);
-    expect(linhasItem(p("psicologia"), 3)).toEqual(["3 Psicologias"]);
-    expect(linhasItem(p("especialista"), 2)).toEqual(["2 Especialistas"]);
-  });
-});

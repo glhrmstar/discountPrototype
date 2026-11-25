@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { PacoteCard, type AcoesItem } from "@/components/CatalogScreen";
 import { BarraInferior, Header, Progresso, Radio, Selo, Stepper } from "@/components/ui";
 import { asset } from "@/lib/asset";
-import { PACOTES, ehIndividual, linhasItem, formatarBRL, pacotePorId, percentualDesconto, precoItem, resumo, type Itens } from "@/lib/catalogo";
+import { PACOTES, ehIndividual, formatarBRL, pacotePorId, percentualDesconto, precoItem, resumo, type Itens } from "@/lib/catalogo";
 import { PARCELAS_MAX, textoParcela, type MetodoId } from "@/lib/pagamento";
 
 export type OpcaoMetodo = MetodoId | "novo";
@@ -82,7 +82,7 @@ export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alert
               )}
               <div className="flex items-center gap-3">
                 <div className="flex min-h-[54px] min-w-0 flex-1 flex-col justify-center gap-1 text-xl">
-                  {linhasItem(p, qtd).map((l) => <span key={l}>{l}</span>)}
+                  {p.linhas.map((l) => <span key={l}>{l}</span>)}
                 </div>
                 <div className="flex flex-col gap-2 text-right leading-none whitespace-nowrap">
                   <s className={`text-xs text-black/50 ${v.deCentavos > v.porCentavos ? "" : "invisible"}`}>{formatarBRL(v.deCentavos)}</s>
