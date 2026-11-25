@@ -75,10 +75,10 @@ export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alert
           return (
             /* Item em lista (sem card): miniatura laranja (avulsa) ou roxa (pacote), tipo + desconto, consultas e preços */
             <article key={id} aria-label={nome} className="flex flex-col gap-4 border-b border-[#dcdcdc] pb-6 [&+&]:mt-2">
-              <div className="flex items-start gap-3">
+              <div className="flex items-center gap-3">
                 <span aria-hidden className={`h-[74px] w-[42px] shrink-0 rounded-xl border ${p.tag ? "border-[#e2d1fa]" : "border-[#fde3c2]"}`} style={{ background: degrade(!!p.tag, 145.98) }} />
                 <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                  <p className="flex items-center gap-1.5 text-xs leading-4 whitespace-nowrap text-[#8e97a8] uppercase">
+                  <p className="flex items-center gap-1.5 text-sm leading-[18px] whitespace-nowrap text-muted uppercase">
                     {rotuloTipo(p)}
                     {pct > 0 && (
                       <>
@@ -93,8 +93,8 @@ export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alert
                       {p.linhas.map((l) => <span key={l}>{l}</span>)}
                     </div>
                     <div className="flex flex-col gap-2 text-right leading-none whitespace-nowrap">
-                      {v.deCentavos > v.porCentavos && <s className="text-sm text-black/50">{formatarBRL(v.deCentavos)}</s>}
-                      <span className="text-base font-semibold">{formatarBRL(v.porCentavos)}</span>
+                      {v.deCentavos > v.porCentavos && <s className="text-sm text-muted">{formatarBRL(v.deCentavos)}</s>}
+                      <span className="text-xl font-semibold">{formatarBRL(v.porCentavos)}</span>
                     </div>
                   </div>
                 </div>
@@ -124,7 +124,7 @@ export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alert
                 <span className="grid size-10 shrink-0 place-items-center">{iconeMetodo("cartao")}</span>
                 <span className="min-w-0 flex-1 text-base whitespace-nowrap">**** {cartaoFinal}</span>
                 {/* parcelas à direita, junto da seta; sem "sem juros" para caber em uma linha (como na conclusão) */}
-                <span className="-mr-1 shrink-0 text-base whitespace-nowrap text-[#808080]">{parcelas}x de {formatarBRL(valorParcela(r.totalPorCentavos, parcelas))}</span>
+                <span className="-mr-1 shrink-0 text-base whitespace-nowrap text-muted">{parcelas}x de {formatarBRL(valorParcela(r.totalPorCentavos, parcelas))}</span>
                 <img src={asset("/assets/seta-dir.svg")} width={16} height={16} alt="" className="shrink-0" />
               </button>
             ) : (
@@ -150,7 +150,7 @@ export default function CartScreen({ itens, metodo, cartaoFinal, parcelas, alert
                       <span className="grid size-10 shrink-0 place-items-center">{iconeMetodo(o.id)}</span>
                       <span className="flex min-w-0 flex-1 flex-col gap-1">
                         <span>{o.nome}</span>
-                        {o.sub && <span className="text-sm text-[#808080]">{o.sub}</span>}
+                        {o.sub && <span className="text-sm text-muted">{o.sub}</span>}
                       </span>
                       <Radio on={on} />
                     </button>

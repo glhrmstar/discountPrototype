@@ -59,7 +59,7 @@ export default function SuccessScreen({ pedido, onVoltar, onAgendar }: Props) {
         <div className="flex h-14 items-center gap-3 rounded-xl border border-[#dcdcdc] px-3">
           <span className="grid size-10 shrink-0 place-items-center">{iconeMetodo(pedido.metodo)}</span>
           <span className="min-w-0 flex-1 truncate text-base">{nomeMetodo}</span>
-          {pedido.metodo === "cartao" && <span className="shrink-0 text-base whitespace-nowrap text-[#808080]">{pedido.parcelas}x de {formatarBRL(valorParcela(r.totalPorCentavos, pedido.parcelas))}</span>}
+          {pedido.metodo === "cartao" && <span className="shrink-0 text-base whitespace-nowrap text-muted">{pedido.parcelas}x de {formatarBRL(valorParcela(r.totalPorCentavos, pedido.parcelas))}</span>}
         </div>
       </section>
 

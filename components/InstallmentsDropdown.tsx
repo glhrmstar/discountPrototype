@@ -50,10 +50,10 @@ export default function InstallmentsDropdown({ totalCentavos, parcelas, onParcel
         }}
         className={`flex h-14 w-full flex-wrap content-center items-center gap-x-2 rounded-2xl border bg-[#f7f7f7] px-4 py-2 text-left shadow-[0_1px_2px_rgba(12,17,29,0.1)] ${aberto ? "border-cta" : "border-[#b6b6b6]"}`}
       >
-        <span className="basis-full text-xs leading-4 text-[#9c9c9c]">Parcelas</span>
+        <span className="basis-full text-xs leading-4 text-muted">Parcelas</span>
         <span className="flex-1 text-base leading-6">{texto}</span>
         <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden className={`flex-none transition-transform ${aberto ? "rotate-180" : ""}`}>
-          <path d="M5 7.5 10 12.5 15 7.5" fill="none" stroke="#808080" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M5 7.5 10 12.5 15 7.5" fill="none" stroke="#696969" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
       {aberto && (
@@ -69,7 +69,7 @@ export default function InstallmentsDropdown({ totalCentavos, parcelas, onParcel
                 className={`flex w-full flex-col gap-0.5 px-4 py-3 text-left ${n === parcelas ? "bg-[#fff5ef] font-semibold" : ""}`}
               >
                 <span className="text-base">{n}x de {formatarBRL(valorParcela(totalCentavos, n))}{n > 1 ? " sem juros" : ""}</span>
-                <span className="text-sm font-normal text-[#808080]">Total {formatarBRL(totalCentavos)}</span>
+                <span className="text-sm font-normal text-muted">Total {formatarBRL(totalCentavos)}</span>
               </button>
             </li>
           ))}
